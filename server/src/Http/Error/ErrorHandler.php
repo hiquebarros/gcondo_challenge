@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Error;
 
+use App\Http\Error\HttpConflictException;
 use App\Http\Error\Slim\HttpConflictException as SlimHttpConflictException;
 use App\Http\Error\Slim\HttpUnprocessableEntityException as SlimHttpUnprocessableEntityException;
 use App\Http\HttpStatus;
@@ -41,6 +42,7 @@ class ErrorHandler extends SlimErrorHandler
                 $exception instanceof HttpNotFoundException => SlimHttpNotFoundException::class,
                 $exception instanceof HttpBadRequestException => SlimHttpBadRequestException::class,
                 $exception instanceof HttpUnprocessableEntityException => SlimHttpUnprocessableEntityException::class,
+                $exception instanceof HttpConflictException => SlimHttpConflictException::class,
                 default => null
             };
 

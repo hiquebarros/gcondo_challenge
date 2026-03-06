@@ -1,6 +1,7 @@
 <?php
 
 use App\Controllers\CondominiumController;
+use App\Controllers\PersonController;
 use App\Controllers\UnitController;
 use App\Http\Response\ResponseBuilder;
 use Slim\Routing\RouteCollectorProxy;
@@ -36,5 +37,13 @@ return function (App $app) {
         $group->post('', [UnitController::class, 'create']);
         $group->put('/{id}', [UnitController::class, 'update']);
         $group->delete('/{id}', [UnitController::class, 'delete']);
+    });
+
+    $app->group('/people', function (RouteCollectorProxy $group) {
+        $group->get('', [PersonController::class, 'list']);
+        $group->get('/{id}', [PersonController::class, 'find']);
+        $group->post('', [PersonController::class, 'create']);
+        $group->put('/{id}', [PersonController::class, 'update']);
+        $group->delete('/{id}', [PersonController::class, 'delete']);
     });
 };

@@ -2,7 +2,7 @@ import { useLocation, useNavigate, useNavigation } from 'react-router';
 
 import { type GetProp, type MenuProps, Spin } from 'antd';
 
-import { BuildOutlined, HomeOutlined } from '@ant-design/icons';
+import { BuildOutlined, HomeOutlined, UserOutlined } from '@ant-design/icons';
 import { Layout } from '@components/Layout';
 
 type Item =  NonNullable<MenuProps['items']>[number];
@@ -31,9 +31,17 @@ export function MainLayout() {
         onClick: () => navigate('/condominiums'),
     };
 
+    const peopleItem: Item = {
+        key: '/people',
+        icon: <UserOutlined />,
+        label: 'Pessoas',
+        onClick: () => navigate('/people'),
+    };
+
     const items = [
         dashboardItem,
-        condominiumsItem
+        condominiumsItem,
+        peopleItem,
     ];
 
     const sider: GetProp<typeof Layout.Root, 'sider'> = props => (
