@@ -2,6 +2,8 @@
 
 use App\Controllers\CondominiumController;
 use App\Controllers\PersonController;
+use App\Controllers\SupplierCategoryController;
+use App\Controllers\SupplierController;
 use App\Controllers\UnitController;
 use App\Http\Response\ResponseBuilder;
 use Slim\Routing\RouteCollectorProxy;
@@ -45,5 +47,15 @@ return function (App $app) {
         $group->post('', [PersonController::class, 'create']);
         $group->put('/{id}', [PersonController::class, 'update']);
         $group->delete('/{id}', [PersonController::class, 'delete']);
+    });
+
+    $app->get('/supplier-categories', [SupplierCategoryController::class, 'list']);
+
+    $app->group('/suppliers', function (RouteCollectorProxy $group) {
+        $group->get('', [SupplierController::class, 'list']);
+        $group->get('/{id}', [SupplierController::class, 'find']);
+        $group->post('', [SupplierController::class, 'create']);
+        $group->put('/{id}', [SupplierController::class, 'update']);
+        $group->delete('/{id}', [SupplierController::class, 'delete']);
     });
 };
