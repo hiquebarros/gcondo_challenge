@@ -14,7 +14,15 @@ class PersonController
 
     public function list(Request $request, Response $response): Response
     {
-        $data = ['people' => $this->service->list()];
+        $params = $request->getQueryParams();
+
+        $filters = [
+            'full_name' => trim($params['full_name'] ?? ''),
+            'cpf' => trim($params['cpf'] ?? ''),
+            'email' => trim($params['email'] ?? ''),
+        ];
+
+        $data = ['people' => $this->service->list($filters)];
 
         $response = ResponseBuilder::respondWithData($response, data: $data);
 

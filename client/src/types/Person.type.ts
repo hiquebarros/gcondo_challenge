@@ -1,4 +1,10 @@
 export namespace Person {
+    export type Filter = {
+        full_name: string;
+        cpf: string;
+        email: string;
+    };
+
     export type Model = {
         id: number,
         full_name: string,

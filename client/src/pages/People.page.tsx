@@ -1,6 +1,8 @@
 import { Fragment } from 'react';
 
-import { Button, Row, type TableColumnsType, Typography } from 'antd';
+import { Button, Col, Input, Row, type TableColumnsType, Typography } from 'antd';
+
+import { SearchOutlined } from '@ant-design/icons';
 
 import { PeopleActionsCell } from '@components/People/PeopleActionsCell';
 import { CreatePersonModal } from '@components/People/CreatePersonModal';
@@ -70,6 +72,9 @@ export function People() {
             {({
                 isLoading,
                 people,
+                filter,
+                setFilter,
+                applyFilter,
                 setIsCreateModalVisible,
                 isCreateModalVisible,
                 isEditModalVisible,
@@ -87,6 +92,45 @@ export function People() {
                             >
                                 Cadastrar
                             </Button>
+                        </Row>
+
+                        <Row gutter={[16, 16]} style={{ marginBottom: 16 }} align="bottom">
+                            <Col xs={24} sm={6}>
+                                <Input
+                                    placeholder="Filtrar por nome"
+                                    value={filter.full_name}
+                                    onChange={e => setFilter(f => ({ ...f, full_name: e.target.value }))}
+                                    onPressEnter={applyFilter}
+                                    allowClear
+                                />
+                            </Col>
+                            <Col xs={24} sm={6}>
+                                <Input
+                                    placeholder="Filtrar por CPF"
+                                    value={filter.cpf}
+                                    onChange={e => setFilter(f => ({ ...f, cpf: e.target.value }))}
+                                    onPressEnter={applyFilter}
+                                    allowClear
+                                />
+                            </Col>
+                            <Col xs={24} sm={6}>
+                                <Input
+                                    placeholder="Filtrar por e-mail"
+                                    value={filter.email}
+                                    onChange={e => setFilter(f => ({ ...f, email: e.target.value }))}
+                                    onPressEnter={applyFilter}
+                                    allowClear
+                                />
+                            </Col>
+                            <Col xs={24} sm={6}>
+                                <Button
+                                    type="primary"
+                                    icon={<SearchOutlined />}
+                                    onClick={applyFilter}
+                                >
+                                    Buscar
+                                </Button>
+                            </Col>
                         </Row>
 
                         <Table

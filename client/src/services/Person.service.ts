@@ -9,8 +9,16 @@ import type {
 } from './contracts/Person.contract';
 import { Request } from './Request';
 
-export const listPeople = (): Promise<ListPeople.Response> =>
-    Request.get('/people');
+function filterToParams(filter: Person.Filter): Record<string, string> {
+    return {
+        full_name: filter.full_name,
+        cpf: filter.cpf,
+        email: filter.email,
+    };
+}
+
+export const listPeople = (filter?: Person.Filter): Promise<ListPeople.Response> =>
+    Request.get('/people', filter ? filterToParams(filter) : undefined);
 
 export const findPerson = (
     id: Person.Model['id'],

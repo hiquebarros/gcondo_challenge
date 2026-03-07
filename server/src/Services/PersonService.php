@@ -9,9 +9,30 @@ use App\Models\Person;
 
 class PersonService
 {
-    public function list()
+    /**
+     * List people with optional filters (case insensitive, LIKE / partial match).
+     *
+     * @param array{full_name?: string, cpf?: string, email?: string} $filters
+     */
+    public function list(array $filters = []): \Illuminate\Database\Eloquent\Collection
     {
-        return Person::all();
+        $query = Person::query();
+
+        $fullName = $filters['full_name'] ?? '';
+        $cpf = $filters['cpf'] ?? '';
+        $email = $filters['email'] ?? '';
+
+        if ($fullName !== '') {
+            $query->whereRaw('LOWER(full_name) LIKE ?', ['%' . mb_strtolower($fullName) . '%']);
+        }
+        if ($cpf !== '') {
+            $query->whereRaw('LOWER(cpf) LIKE ?', ['%' . mb_strtolower($cpf) . '%']);
+        }
+        if ($email !== '') {
+            $query->whereRaw('LOWER(email) LIKE ?', ['%' . mb_strtolower($email) . '%']);
+        }
+
+        return $query->get();
     }
 
     public function find(int $id): Person

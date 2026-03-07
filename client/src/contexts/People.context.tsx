@@ -11,14 +11,34 @@ import {
 } from 'react';
 
 import { App } from 'antd';
+import { useSearchParams } from 'react-router';
 
 import { UnknownContextError } from '@errors/UnknownContextError';
 import { handleServiceError, hasServiceError } from '@helpers/Service.helper';
 import type { Person } from '@internal-types/Person.type';
 import { listPeople } from '@services/Person.service';
 
+function filterFromSearchParams(searchParams: URLSearchParams): Person.Filter {
+    return {
+        full_name: searchParams.get('full_name') ?? '',
+        cpf: searchParams.get('cpf') ?? '',
+        email: searchParams.get('email') ?? '',
+    };
+}
+
+function filterToSearchParams(filter: Person.Filter): Record<string, string> {
+    const params: Record<string, string> = {};
+    if (filter.full_name.trim()) params.full_name = filter.full_name.trim();
+    if (filter.cpf.trim()) params.cpf = filter.cpf.trim();
+    if (filter.email.trim()) params.email = filter.email.trim();
+    return params;
+}
+
 type Value = {
     people: Person.Model[];
+    filter: Person.Filter;
+    setFilter: Dispatch<SetStateAction<Value['filter']>>;
+    applyFilter: () => void;
     person: Person.Model | null;
     personId: Person.Model['id'] | null;
     setPersonId: Dispatch<SetStateAction<Value['personId']>>;
@@ -27,7 +47,7 @@ type Value = {
     setIsCreateModalVisible: Dispatch<SetStateAction<Value['isCreateModalVisible']>>;
     isEditModalVisible: boolean;
     setIsEditModalVisible: Dispatch<SetStateAction<Value['isEditModalVisible']>>;
-    fetchPeople: () => Promise<void>;
+    fetchPeople: (criteria?: Person.Filter) => Promise<void>;
 };
 
 type Props = { children: (value: Value) => ReactNode };
@@ -35,21 +55,23 @@ type Props = { children: (value: Value) => ReactNode };
 // eslint-disable-next-line react-refresh/only-export-components
 export const PeopleContext = createContext<Value | null>(null);
 
-/** @see https://www.youtube.com/watch?v=I7dwJxGuGYQ */
 export function PeopleContextProvider({ children }: Props) {
-    const [isLoading, setIsLoading] = useState<Value['isLoading']>(true);
+    const [searchParams, setSearchParams] = useSearchParams();
 
+    const [isLoading, setIsLoading] = useState<Value['isLoading']>(true);
     const [people, setPeople] = useState<Value['people']>([]);
+    const [filter, setFilter] = useState<Person.Filter>(() => filterFromSearchParams(searchParams));
     const [personId, setPersonId] = useState<Person.Model['id'] | null>(null);
     const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 
     const app = App.useApp();
 
-    const fetchPeople = useCallback(async () => {
+    const fetchPeople = useCallback(async (criteria?: Person.Filter) => {
         setIsLoading(true);
 
-        const response = await listPeople();
+        const params = criteria ?? filter;
+        const response = await listPeople(params);
 
         setIsLoading(false);
 
@@ -57,17 +79,30 @@ export function PeopleContextProvider({ children }: Props) {
             return handleServiceError(app, response);
 
         setPeople(response.data.people);
-    }, [app]);
+    }, [app, filter]);
 
     useEffect(() => {
-        fetchPeople();
-    }, [fetchPeople]);
+        const criteria = filterFromSearchParams(searchParams);
+        setFilter(criteria);
+        setIsLoading(true);
+        listPeople(criteria)
+            .then(response => {
+                if (hasServiceError(response))
+                    return handleServiceError(app, response);
+                setPeople(response.data.people);
+            })
+            .finally(() => setIsLoading(false));
+    }, [searchParams, app]);
+
+    const applyFilter = useCallback(() => {
+        setSearchParams(filterToSearchParams(filter));
+    }, [filter, setSearchParams]);
 
     const person = useMemo(() => {
         if (!personId)
             return null;
 
-        const found = people.find(p => p.id === personId);
+        const found = people.find((p: Person.Model) => p.id === personId);
 
         if (!found)
             throw new Error(`Could not find a person with id ${personId}`);
@@ -78,6 +113,9 @@ export function PeopleContextProvider({ children }: Props) {
     const value: Value = {
         isLoading,
         people,
+        filter,
+        setFilter,
+        applyFilter,
         person,
         personId,
         setPersonId,
