@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Error\ErrorHandler;
+use App\Middleware\CsrfMiddleware;
+use App\Middleware\SessionMiddleware;
 use Carbon\Carbon;
 use DI\Container;
 use Dotenv\Dotenv;
@@ -41,6 +43,9 @@ AppFactory::setContainer($container);
 $app = AppFactory::create();
 
 $app->addBodyParsingMiddleware();
+
+$app->add(SessionMiddleware::class);
+$app->add(CsrfMiddleware::class);
 
 $app->addRoutingMiddleware();
 

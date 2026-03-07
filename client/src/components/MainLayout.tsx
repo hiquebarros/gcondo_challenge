@@ -2,8 +2,9 @@ import { useLocation, useNavigate, useNavigation } from 'react-router';
 
 import { type GetProp, type MenuProps, Spin } from 'antd';
 
-import { BuildOutlined, HomeOutlined, ShopOutlined, UserOutlined } from '@ant-design/icons';
+import { BuildOutlined, HomeOutlined, LogoutOutlined, ShopOutlined, UserOutlined } from '@ant-design/icons';
 import { Layout } from '@components/Layout';
+import { useAuth } from '@contexts/Auth.context';
 
 type Item =  NonNullable<MenuProps['items']>[number];
 
@@ -11,7 +12,8 @@ export function MainLayout() {
     const location = useLocation();
     const navigate = useNavigate();
     const navigation = useNavigation();
-    
+    const { logout } = useAuth();
+
     const initialKey = location.pathname.split('/').slice(0, 2).join('/');
 
     if (navigation.state === 'loading')
@@ -45,11 +47,19 @@ export function MainLayout() {
         onClick: () => navigate('/suppliers'),
     };
 
+    const logoutItem: Item = {
+        key: 'logout',
+        icon: <LogoutOutlined />,
+        label: 'Sair',
+        onClick: () => logout(),
+    };
+
     const items = [
         dashboardItem,
         condominiumsItem,
         peopleItem,
         suppliersItem,
+        logoutItem,
     ];
 
     const sider: GetProp<typeof Layout.Root, 'sider'> = props => (

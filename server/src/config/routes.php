@@ -1,11 +1,13 @@
 <?php
 
+use App\Controllers\AuthController;
 use App\Controllers\CondominiumController;
 use App\Controllers\PersonController;
 use App\Controllers\SupplierCategoryController;
 use App\Controllers\SupplierController;
 use App\Controllers\UnitController;
 use App\Http\Response\ResponseBuilder;
+use App\Middleware\RequireAuthMiddleware;
 use Slim\Routing\RouteCollectorProxy;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -16,6 +18,10 @@ return function (App $app) {
         // CORS Pre-Flight OPTIONS Request Handler
         return $response;
     });
+
+    $app->post('/login', [AuthController::class, 'login']);
+    $app->post('/logout', [AuthController::class, 'logout'])->add(RequireAuthMiddleware::class);
+    $app->get('/auth/me', [AuthController::class, 'me'])->add(RequireAuthMiddleware::class);
 
     $app->get('/', function (Request $request, Response $response) {
         $data = ['message' => 'Welcome to the Gcondo Slim REST API'];

@@ -1,9 +1,11 @@
+import { getCsrfToken } from '@lib/csrfToken';
+
 type Route = `/${string}`;
 type Method = 'get' | 'post' | 'patch' | 'put' | 'delete';
 
 export const BASE_URL = import.meta.env.VITE_API_URL;
 
-const DEFAULT_HEADERS = {
+const DEFAULT_HEADERS: Record<string, string> = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
 };
@@ -27,10 +29,17 @@ async function call(route: Route, method: Method, data: unknown, params?: Record
         ? JSON.stringify(data)
         : null;
 
+    const headers: Record<string, string> = { ...DEFAULT_HEADERS };
+    const token = getCsrfToken();
+    if (token && method !== 'get') {
+        headers['X-CSRF-Token'] = token;
+    }
+
     const init: RequestInit = {
         body,
-        headers: DEFAULT_HEADERS,
+        headers,
         method,
+        credentials: 'include',
     };
 
     try {
