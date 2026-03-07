@@ -11,6 +11,7 @@ class Users extends AbstractMigration
             ->addColumn('name', 'string', ['null' => false])
             ->addColumn('email', 'string', ['null' => false])
             ->addColumn('password_hash', 'string', ['null' => false])
+            ->addColumn('role', 'enum', ['values' => ['pessoa_operacao', 'coordenacao', 'equipe_interna'], 'null' => false, 'default' => 'pessoa_operacao'])
             ->addIndex('email', ['unique' => true]);
 
         PhinxHelper::setDatetimeColumns($table);
