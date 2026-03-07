@@ -10,28 +10,23 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 
-class SessionMiddleware implements MiddlewareInterface
+class JwtAuthMiddleware implements MiddlewareInterface
 {
     public function __construct(private AuthService $authService) {}
 
     public function process(Request $request, RequestHandler $handler): Response
     {
-        $cookies = $request->getCookieParams();
-        $sessionToken = $cookies[AuthService::getSessionCookieName()] ?? null;
-
-        $session = null;
         $user = null;
 
-        if ($sessionToken !== null && $sessionToken !== '') {
-            $session = $this->authService->getSessionFromToken($sessionToken);
-            if ($session !== null) {
-                $user = $session->user;
+        $authHeader = $request->getHeaderLine('Authorization');
+        if (str_starts_with($authHeader, 'Bearer ')) {
+            $token = trim(substr($authHeader, 7));
+            if ($token !== '') {
+                $user = $this->authService->getUserFromToken($token);
             }
         }
 
-        $request = $request
-            ->withAttribute('session', $session)
-            ->withAttribute('user', $user);
+        $request = $request->withAttribute('user', $user);
 
         return $handler->handle($request);
     }

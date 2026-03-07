@@ -1,4 +1,4 @@
-import { getCsrfToken } from '@lib/csrfToken';
+import { getAuthToken } from '@lib/authToken';
 
 type Route = `/${string}`;
 type Method = 'get' | 'post' | 'patch' | 'put' | 'delete';
@@ -30,9 +30,9 @@ async function call(route: Route, method: Method, data: unknown, params?: Record
         : null;
 
     const headers: Record<string, string> = { ...DEFAULT_HEADERS };
-    const token = getCsrfToken();
-    if (token && method !== 'get') {
-        headers['X-CSRF-Token'] = token;
+    const token = getAuthToken();
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
     }
 
     const init: RequestInit = {

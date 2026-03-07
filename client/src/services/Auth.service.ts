@@ -5,7 +5,7 @@ import { Request } from './Request';
 export namespace Login {
     export type Body = { email: string; password: string };
 
-    type Data = { user: User.Model; csrf_token: string; expires_at: string };
+    type Data = { user: User.Model; token: string; expires_at: string };
 
     export type Response =
         | Service.DefaultResponse<Data>
@@ -21,7 +21,7 @@ export namespace Logout {
 }
 
 export namespace Me {
-    type Data = { user: User.Model; csrf_token: string };
+    type Data = { user: User.Model };
 
     export type Response =
         | Service.DefaultResponse<Data>

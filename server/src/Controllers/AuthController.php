@@ -6,14 +6,13 @@ namespace App\Controllers;
 
 use App\Http\HttpStatus;
 use App\Http\Response\ResponseBuilder;
+use App\Models\User;
 use App\Services\AuthService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 class AuthController
 {
-    private const COOKIE_MAX_AGE_DAYS = 7;
-
     public function __construct(private AuthService $authService) {}
 
     public function login(Request $request, Response $response): Response
@@ -36,50 +35,27 @@ class AuthController
 
         $data = [
             'user' => $result['user'],
-            'csrf_token' => $result['csrf_token'],
+            'token' => $result['token'],
             'expires_at' => $result['expires_at'],
         ];
 
         $response = ResponseBuilder::respondWithData($response, HttpStatus::OK, $data);
-        $response = $response->withHeader('Content-Type', 'application/json')->withStatus(HttpStatus::OK->value);
-
-        $cookieValue = sprintf(
-            '%s=%s; Path=/; HttpOnly; SameSite=Strict; Max-Age=%d',
-            AuthService::getSessionCookieName(),
-            $result['session_token'],
-            self::COOKIE_MAX_AGE_DAYS * 86400
-        );
-        $response = $response->withAddedHeader('Set-Cookie', $cookieValue);
-
-        return $response;
+        return $response->withHeader('Content-Type', 'application/json')->withStatus(HttpStatus::OK->value);
     }
 
     public function logout(Request $request, Response $response): Response
     {
-        $session = $request->getAttribute('session');
-
-        if ($session !== null) {
-            $this->authService->logout($session->session_token);
-        }
-
         $response = ResponseBuilder::respondWithData($response, HttpStatus::OK, ['message' => 'Logout realizado.']);
-        $response = $response->withHeader('Content-Type', 'application/json')->withStatus(HttpStatus::OK->value);
-
-        $clearCookie = sprintf(
-            '%s=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0',
-            AuthService::getSessionCookieName()
-        );
-        return $response->withAddedHeader('Set-Cookie', $clearCookie);
+        return $response->withHeader('Content-Type', 'application/json')->withStatus(HttpStatus::OK->value);
     }
 
     public function me(Request $request, Response $response): Response
     {
+        /** @var User $user */
         $user = $request->getAttribute('user');
-        $session = $request->getAttribute('session');
 
         $data = [
             'user' => $user->toArray(),
-            'csrf_token' => $session->csrf_token,
         ];
 
         $response = ResponseBuilder::respondWithData($response, HttpStatus::OK, $data);

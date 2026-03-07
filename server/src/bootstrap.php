@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Error\ErrorHandler;
-use App\Middleware\CsrfMiddleware;
-use App\Middleware\SessionMiddleware;
+use App\Middleware\JwtAuthMiddleware;
+use App\Services\AuthService;
 use Carbon\Carbon;
 use DI\Container;
 use Dotenv\Dotenv;
@@ -24,6 +24,7 @@ $dotenv->required([
     'DATABASE_PASSWORD',
 
     'CORS_ALLOWED_ORIGIN',
+    'JWT_SECRET',
 ]);
 
 $container = new Container();
@@ -38,16 +39,20 @@ $container->set('database', function () {
     return $capsule;
 });
 
+$container->set(AuthService::class, function () {
+    return new AuthService((string) getenv('JWT_SECRET'));
+});
+
 AppFactory::setContainer($container);
 
 $app = AppFactory::create();
 
 $app->addBodyParsingMiddleware();
 
-$app->add(SessionMiddleware::class);
-$app->add(CsrfMiddleware::class);
-
 $app->addRoutingMiddleware();
+
+// JWT auth: last added runs first (LIFO), sets user from Authorization: Bearer <token>
+$app->add(JwtAuthMiddleware::class);
 
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 

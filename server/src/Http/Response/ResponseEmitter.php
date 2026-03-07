@@ -14,8 +14,8 @@ class ResponseEmitter extends SlimResponseEmitter
      */
     public function emit(Response $response): void
     {
-        // This variable should be set to the allowed host from which your API can be accessed with
-        $origin = $_ENV['CORS_ALLOWED_ORIGIN'];
+        // Use getenv() so CORS works when env is set by Docker/PHP-FPM (where $_ENV may be empty)
+        $origin = (string) (getenv('CORS_ALLOWED_ORIGIN') ?: $_ENV['CORS_ALLOWED_ORIGIN'] ?? '');
 
         $response = $response
             ->withHeader('Access-Control-Allow-Origin', $origin)

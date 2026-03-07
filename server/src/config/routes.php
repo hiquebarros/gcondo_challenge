@@ -15,8 +15,8 @@ use Slim\App;
 
 return function (App $app) {
     $app->options('/{routes:.*}', function (Request $request, Response $response) {
-        // CORS Pre-Flight OPTIONS Request Handler
-        return $response;
+        // CORS Pre-Flight OPTIONS – ResponseEmitter adds Access-Control-* headers
+        return $response->withStatus(204);
     });
 
     $app->post('/login', [AuthController::class, 'login']);
@@ -37,7 +37,7 @@ return function (App $app) {
         $group->post('', [CondominiumController::class, 'create']);
         $group->put('/{id}', [CondominiumController::class, 'update']);
         $group->delete('/{id}', [CondominiumController::class, 'delete']);
-    });
+    })->add(RequireAuthMiddleware::class);
 
     $app->group('/units', function (RouteCollectorProxy $group) {
         $group->get('', [UnitController::class, 'list']);

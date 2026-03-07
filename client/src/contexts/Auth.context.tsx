@@ -14,7 +14,7 @@ import { App } from 'antd';
 import { UnknownContextError } from '@errors/UnknownContextError';
 import { handleServiceError, hasServiceError } from '@helpers/Service.helper';
 import type { User } from '@internal-types/User.type';
-import { setCsrfToken } from '@lib/csrfToken';
+import { getAuthToken, setAuthToken } from '@lib/authToken';
 import { login as loginApi, me as meApi, logout as logoutApi } from '@services/Auth.service';
 
 type Value = {
@@ -40,14 +40,17 @@ export function AuthProvider({ children }: Props) {
         const response = await meApi();
         if (hasServiceError(response)) {
             setUser(null);
-            setCsrfToken(null);
+            setAuthToken(null);
             return;
         }
         setUser(response.data.user);
-        setCsrfToken(response.data.csrf_token);
     }, []);
 
     useEffect(() => {
+        if (!getAuthToken()) {
+            setIsLoading(false);
+            return;
+        }
         loadMe().finally(() => setIsLoading(false));
     }, [loadMe]);
 
@@ -57,15 +60,15 @@ export function AuthProvider({ children }: Props) {
             handleServiceError(app, response);
             return false;
         }
+        setAuthToken(response.data.token);
         setUser(response.data.user);
-        setCsrfToken(response.data.csrf_token);
         return true;
     }, [app]);
 
     const logout = useCallback(async () => {
         await logoutApi();
+        setAuthToken(null);
         setUser(null);
-        setCsrfToken(null);
     }, []);
 
     const value: Value = {
