@@ -15,7 +15,6 @@ class Suppliers extends AbstractMigration
 
         PhinxHelper::setForeignColumn($table, 'supplier_address_id', 'supplier_addresses', true);
         PhinxHelper::setForeignColumn($table, 'supplier_category_id', 'supplier_categories');
-        PhinxHelper::setForeignColumn($table, 'created_by_condominium_id', 'condominiums');
         PhinxHelper::setDatetimeColumns($table);
 
         $table->create();

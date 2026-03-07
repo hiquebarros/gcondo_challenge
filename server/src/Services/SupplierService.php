@@ -57,7 +57,6 @@ class SupplierService
             'cnpj' => $this->normalizeCnpj($data['cnpj'] ?? ''),
             'email' => $data['email'],
             'supplier_category_id' => isset($data['supplier_category_id']) ? (int) $data['supplier_category_id'] : null,
-            'created_by_condominium_id' => isset($data['created_by_condominium_id']) ? (int) $data['created_by_condominium_id'] : null,
         ]);
 
         if (!empty($data['person_ids']) && is_array($data['person_ids'])) {

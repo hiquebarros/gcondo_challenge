@@ -26,7 +26,6 @@ export namespace Supplier {
         email: string;
         supplier_address_id: number | null;
         supplier_category_id: number | null;
-        created_by_condominium_id: number | null;
         created_at: string;
         updated_at: string;
         deleted_at: string | null;

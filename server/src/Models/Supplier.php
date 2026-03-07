@@ -15,7 +15,6 @@ class Supplier extends Model
         'email',
         'supplier_address_id',
         'supplier_category_id',
-        'created_by_condominium_id',
     ];
 
     public function category()
