@@ -23,7 +23,12 @@ export function CreatePersonModal() {
     const onFinish = async (values: Values) => {
         setIsSending(true);
 
-        const response = await createPerson(values);
+        const response = await createPerson({
+            full_name: values.full_name,
+            cpf: values.cpf,
+            email: values.email,
+            birth_date: values.birth_date,
+        });
 
         await sleep(1000);
 
@@ -55,7 +60,7 @@ export function CreatePersonModal() {
                 layout="vertical"
                 autoComplete="off"
             >
-                <PersonFields />
+                <PersonFields showDeclaration />
             </Form>
         </Modal>
     );

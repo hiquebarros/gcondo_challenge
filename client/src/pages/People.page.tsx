@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 
-import { Button, Col, Input, Row, type TableColumnsType, Typography } from 'antd';
+import { Alert, Button, Col, Input, Row, type TableColumnsType, Typography } from 'antd';
 
 import { SearchOutlined } from '@ant-design/icons';
 
@@ -8,6 +8,7 @@ import { PeopleActionsCell } from '@components/People/PeopleActionsCell';
 import { CreatePersonModal } from '@components/People/CreatePersonModal';
 import { EditPersonModal } from '@components/People/EditPersonModal';
 import { Table } from '@components/Table';
+import { useAuth } from '@contexts/Auth.context';
 import { PeopleContextProvider } from '@contexts/People.context';
 import type { Person } from '@internal-types/Person.type';
 import { Show } from '@lib/Show';
@@ -33,10 +34,14 @@ function formatBirthDate(value: string | undefined): string {
     }
 }
 
-// Imitando comportamento por "role" do usuário
-const isAdmin = false;
+const DECLARATION_EDIT_INTERNAL =
+    'A edição de registros existentes é feita apenas pela equipe interna da Gcondo.';
 
-const COLUMNS: TableColumnsType<Person.Model> = [
+function usePeopleColumns(): TableColumnsType<Person.Model> {
+    const { user } = useAuth();
+    const isEquipeInterna = user?.role === 'equipe_interna';
+
+    return [
     {
         title: 'ID',
         dataIndex: 'id',
@@ -61,12 +66,17 @@ const COLUMNS: TableColumnsType<Person.Model> = [
         render: (value: string) => formatBirthDate(value),
     },
     {
-        // Imitando comportamento por "role" do usuário
-        render: (_: unknown, record: Person.Model) => isAdmin ? <PeopleActionsCell person={record} /> : null,
+        render: (_: unknown, record: Person.Model) =>
+            isEquipeInterna ? <PeopleActionsCell person={record} /> : null,
     },
 ];
+}
 
 export function People() {
+    const { user } = useAuth();
+    const showEditNotice = user != null && user.role !== 'equipe_interna';
+    const columns = usePeopleColumns();
+
     return (
         <PeopleContextProvider>
             {({
@@ -93,6 +103,15 @@ export function People() {
                                 Cadastrar
                             </Button>
                         </Row>
+
+                        {showEditNotice && (
+                            <Alert
+                                type="info"
+                                message={DECLARATION_EDIT_INTERNAL}
+                                showIcon
+                                style={{ marginBottom: 16 }}
+                            />
+                        )}
 
                         <Row gutter={[16, 16]} style={{ marginBottom: 16 }} align="bottom">
                             <Col xs={24} sm={6}>
@@ -134,7 +153,7 @@ export function People() {
                         </Row>
 
                         <Table
-                            columns={COLUMNS}
+                            columns={columns}
                             dataSource={people}
                             loading={isLoading}
                         />

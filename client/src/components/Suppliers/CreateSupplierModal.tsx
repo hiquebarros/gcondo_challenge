@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 
-import { App, Col, Divider, Form, Input, Modal, Row, Select } from 'antd';
+import { App, Checkbox, Col, Divider, Form, Input, Modal, Row, Select } from 'antd';
 
 import { CnpjInput } from '@components/Suppliers/CnpjInput';
 import { useSuppliersContext } from '@contexts/Suppliers.context';
@@ -20,6 +20,9 @@ function personToOption(p: Person.Model) {
     return { value: p.id, label: `${p.full_name} (${p.email})` };
 }
 
+const DECLARATION_TEXT =
+    'Declaro que os dados informados são verdadeiros e estou ciente de que este registro poderá ser utilizado por outros condomínios da Gcondo.';
+
 export type CreateSupplierValues = {
     legal_name: string;
     trade_name?: string;
@@ -28,6 +31,7 @@ export type CreateSupplierValues = {
     supplier_category_id: number | null;
     person_ids: number[];
     address: SupplierAddressBody;
+    declaration_accepted: boolean;
 };
 
 export function CreateSupplierModal() {
@@ -268,12 +272,6 @@ export function CreateSupplierModal() {
                             <Input placeholder="Número" />
                         </Form.Item>
 
-                        <Form.Item<CreateSupplierValues>
-                            name={['address', 'complement']}
-                            label="Complemento"
-                        >
-                            <Input placeholder="Apto, bloco, etc." />
-                        </Form.Item>
                     </Col>
 
                     <Col xs={24} md={12}>
@@ -304,8 +302,30 @@ export function CreateSupplierModal() {
                             </Col>
                         </Row>
 
+                        <Form.Item<CreateSupplierValues>
+                            name={['address', 'complement']}
+                            label="Complemento"
+                        >
+                            <Input placeholder="Apto, bloco, etc." />
+                        </Form.Item>
+
                     </Col>
                 </Row>
+
+                <Form.Item<CreateSupplierValues>
+                    name="declaration_accepted"
+                    valuePropName="checked"
+                    rules={[
+                        {
+                            validator: (_, value) =>
+                                value === true
+                                    ? Promise.resolve()
+                                    : Promise.reject(new Error('É necessário aceitar a declaração para continuar.')),
+                        },
+                    ]}
+                >
+                    <Checkbox>{DECLARATION_TEXT}</Checkbox>
+                </Form.Item>
             </Form>
         </Modal>
     );

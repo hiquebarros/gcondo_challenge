@@ -1,12 +1,16 @@
 import { Fragment } from 'react';
 
-import { Form, Input } from 'antd';
+import { Checkbox, Form, Input } from 'antd';
+
+export const DECLARATION_TEXT =
+    'Declaro que os dados informados são verdadeiros e estou ciente de que este registro poderá ser utilizado por outros condomínios da Gcondo.';
 
 export type Values = {
     full_name: string;
     cpf: string;
     email: string;
     birth_date: string;
+    declaration_accepted?: boolean;
 };
 
 function formatCpfDisplay(value: string | undefined): string {
@@ -46,7 +50,9 @@ function getMaxBirthDateForAdult(): string {
     return d.toISOString().slice(0, 10);
 }
 
-export function PersonFields() {
+type PersonFieldsProps = { showDeclaration?: boolean };
+
+export function PersonFields({ showDeclaration = true }: PersonFieldsProps) {
     const maxBirthDate = getMaxBirthDateForAdult();
 
     return (
@@ -100,6 +106,23 @@ export function PersonFields() {
             >
                 <Input type="date" max={maxBirthDate} />
             </Form.Item>
+
+            {showDeclaration && (
+                <Form.Item<Values>
+                    name="declaration_accepted"
+                    valuePropName="checked"
+                    rules={[
+                        {
+                            validator: (_, value) =>
+                                value === true
+                                    ? Promise.resolve()
+                                    : Promise.reject(new Error('É necessário aceitar a declaração para continuar.')),
+                        },
+                    ]}
+                >
+                    <Checkbox>{DECLARATION_TEXT}</Checkbox>
+                </Form.Item>
+            )}
         </Fragment>
     );
 }

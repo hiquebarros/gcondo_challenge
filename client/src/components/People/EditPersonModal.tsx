@@ -34,7 +34,12 @@ export function EditPersonModal() {
     const onFinish = async (values: Values) => {
         setIsSending(true);
 
-        const response = await updatePerson(person.id, values);
+        const response = await updatePerson(person.id, {
+            full_name: values.full_name,
+            cpf: values.cpf,
+            email: values.email,
+            birth_date: values.birth_date,
+        });
 
         await sleep(1000);
 
@@ -72,7 +77,7 @@ export function EditPersonModal() {
                     birth_date: person.birth_date,
                 }}
             >
-                <PersonFields />
+                <PersonFields showDeclaration={false} />
             </Form>
         </Modal>
     );

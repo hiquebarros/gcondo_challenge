@@ -1,14 +1,18 @@
 import { Fragment } from 'react';
 
-import { Button, Col, Input, Row, Select, type TableColumnsType, Typography } from 'antd';
+import { Alert, Button, Col, Input, Row, Select, type TableColumnsType, Typography } from 'antd';
 
 import { SearchOutlined } from '@ant-design/icons';
 
 import { CreateSupplierModal } from '@components/Suppliers/CreateSupplierModal';
 import { Table } from '@components/Table';
+import { useAuth } from '@contexts/Auth.context';
 import { SuppliersContextProvider } from '@contexts/Suppliers.context';
 import type { Supplier } from '@internal-types/Supplier.type';
 import { Show } from '@lib/Show';
+
+const DECLARATION_EDIT_INTERNAL =
+    'A edição de registros existentes é feita apenas pela equipe interna da Gcondo.';
 
 function formatCnpj(value: string | undefined): string {
     if (!value) return '—';
@@ -49,6 +53,9 @@ const COLUMNS: TableColumnsType<Supplier.Model> = [
 ];
 
 export function Suppliers() {
+    const { user } = useAuth();
+    const showEditNotice = user != null && user.role !== 'equipe_interna';
+
     return (
         <SuppliersContextProvider>
             {({
@@ -75,6 +82,15 @@ export function Suppliers() {
                                 Cadastrar
                             </Button>
                         </Row>
+
+                        {showEditNotice && (
+                            <Alert
+                                type="info"
+                                message={DECLARATION_EDIT_INTERNAL}
+                                showIcon
+                                style={{ marginBottom: 16 }}
+                            />
+                        )}
 
                         <Row gutter={[16, 16]} style={{ marginBottom: 16 }} align="bottom">
                             <Col xs={24} sm={6}>
