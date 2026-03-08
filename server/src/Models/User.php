@@ -31,4 +31,9 @@ class User extends Model
     {
         return $this->belongsToMany(Condominium::class, 'user_condominiuns');
     }
+
+    public function canSeeAllCondominiums(): bool
+    {
+        return $this->role === self::ROLE_EQUIPE_INTERNA;
+    }
 }

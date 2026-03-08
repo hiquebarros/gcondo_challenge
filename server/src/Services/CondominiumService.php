@@ -6,12 +6,16 @@ use App\Http\Error\HttpBadRequestException;
 use App\Http\Error\HttpNotFoundException;
 use App\Http\Error\HttpUnprocessableEntityException;
 use App\Models\Condominium;
+use App\Models\User;
 
 class CondominiumService
 {
-    public function list()
+    public function list(User $user)
     {
-        return Condominium::all();
+        if ($user->canSeeAllCondominiums()) {
+            return Condominium::all();
+        }
+        return $user->condominiums;
     }
 
     public function find(int $id): Condominium
@@ -25,7 +29,7 @@ class CondominiumService
         return $condominium;
     }
 
-    public function create(array $data): Condominium
+    public function create(array $data, User $user): Condominium
     {
         $this->validateCondominiumData($data);
 
@@ -34,6 +38,8 @@ class CondominiumService
             'zip_code' => $data['zip_code'],
             'url' => $data['url']
         ]);
+
+        $user->condominiums()->attach($condominium->id);
 
         return $condominium;
     }
@@ -64,6 +70,7 @@ class CondominiumService
             throw new HttpBadRequestException('Cannot delete condominium with units');
         }
 
+        $condominium->users()->detach();
         $deleted = $condominium->delete();
 
         return $deleted;
