@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Http\Error\HttpNotFoundException;
 use App\Http\Error\HttpUnprocessableEntityException;
 use App\Models\Supplier;
+use App\Models\SupplierAddress;
 
 class SupplierService
 {
@@ -13,7 +14,7 @@ class SupplierService
      */
     public function list(array $filters = []): \Illuminate\Database\Eloquent\Collection
     {
-        $query = Supplier::query()->with(['category', 'people']);
+        $query = Supplier::query()->with(['category', 'people', 'address']);
 
         $legalName = trim($filters['legal_name'] ?? '');
         $cnpj = trim($filters['cnpj'] ?? '');
@@ -50,12 +51,16 @@ class SupplierService
     public function create(array $data): Supplier
     {
         $this->validateSupplierData($data);
+        $this->validateAddressData($data['address'] ?? []);
+
+        $address = $this->createOrUpdateAddress($data['address'] ?? []);
 
         $supplier = Supplier::create([
             'legal_name' => $data['legal_name'],
             'trade_name' => $data['trade_name'] ?? null,
             'cnpj' => $this->normalizeCnpj($data['cnpj'] ?? ''),
             'email' => $data['email'],
+            'supplier_address_id' => $address?->id,
             'supplier_category_id' => isset($data['supplier_category_id']) ? (int) $data['supplier_category_id'] : null,
         ]);
 
@@ -63,7 +68,7 @@ class SupplierService
             $supplier->people()->sync(array_map('intval', $data['person_ids']));
         }
 
-        return $supplier->load(['category', 'people']);
+        return $supplier->load(['category', 'people', 'address']);
     }
 
     public function update(int $id, array $data): Supplier
@@ -71,26 +76,37 @@ class SupplierService
         $supplier = $this->find($id);
 
         $this->validateSupplierData($data);
+        if (isset($data['address'])) {
+            $this->validateAddressData($data['address']);
+        }
+
+        $address = isset($data['address']) ? $this->createOrUpdateAddress($data['address'], $supplier->supplier_address_id) : null;
 
         $supplier->fill([
             'legal_name' => $data['legal_name'],
             'trade_name' => $data['trade_name'] ?? null,
             'cnpj' => $this->normalizeCnpj($data['cnpj'] ?? ''),
             'email' => $data['email'],
+            'supplier_address_id' => $address?->id ?? $supplier->supplier_address_id,
             'supplier_category_id' => isset($data['supplier_category_id']) ? (int) $data['supplier_category_id'] : null,
         ]);
         $supplier->save();
 
         $supplier->people()->sync(!empty($data['person_ids']) && is_array($data['person_ids']) ? array_map('intval', $data['person_ids']) : []);
 
-        return $supplier->load(['category', 'people']);
+        return $supplier->load(['category', 'people', 'address']);
     }
 
     public function delete(int $id): bool
     {
         $supplier = $this->find($id);
         $supplier->people()->detach();
-        return $supplier->delete();
+        $addressId = $supplier->supplier_address_id;
+        $deleted = $supplier->delete();
+        if ($deleted && $addressId) {
+            SupplierAddress::where('id', $addressId)->delete();
+        }
+        return $deleted;
     }
 
     /** @throws HttpUnprocessableEntityException */
@@ -110,5 +126,48 @@ class SupplierService
     private function normalizeCnpj(string $cnpj): string
     {
         return preg_replace('/\D/', '', $cnpj);
+    }
+
+    /** @throws HttpUnprocessableEntityException */
+    private function validateAddressData(array $data): void
+    {
+        if (empty(trim($data['street'] ?? ''))) {
+            throw new HttpUnprocessableEntityException('Endereço (logradouro) é obrigatório');
+        }
+        if (empty(trim($data['city'] ?? ''))) {
+            throw new HttpUnprocessableEntityException('Cidade é obrigatória');
+        }
+        if (empty(trim($data['postal_code'] ?? ''))) {
+            throw new HttpUnprocessableEntityException('CEP é obrigatório');
+        }
+        $postalCode = preg_replace('/\D/', '', $data['postal_code'] ?? '');
+        if (strlen($postalCode) !== 8) {
+            throw new HttpUnprocessableEntityException('CEP deve ter 8 dígitos');
+        }
+    }
+
+    private function createOrUpdateAddress(array $data, ?int $existingAddressId = null): ?SupplierAddress
+    {
+        $payload = [
+            'street' => trim($data['street'] ?? ''),
+            'number' => trim($data['number'] ?? '') ?: null,
+            'complement' => trim($data['complement'] ?? '') ?: null,
+            'neighborhood' => trim($data['neighborhood'] ?? '') ?: null,
+            'city' => trim($data['city'] ?? ''),
+            'state' => trim($data['state'] ?? '') ?: null,
+            'country' => trim($data['country'] ?? '') ?: null,
+            'postal_code' => preg_replace('/\D/', '', $data['postal_code'] ?? '') ?: null,
+        ];
+
+        if ($existingAddressId) {
+            $address = SupplierAddress::find($existingAddressId);
+            if ($address) {
+                $address->fill($payload);
+                $address->save();
+                return $address;
+            }
+        }
+
+        return SupplierAddress::create($payload);
     }
 }

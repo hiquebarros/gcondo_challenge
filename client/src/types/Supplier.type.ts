@@ -1,5 +1,20 @@
 import type { Person } from '@internal-types/Person.type';
 
+export namespace SupplierAddress {
+    export type Model = {
+        id: number;
+        street: string;
+        number: string | null;
+        complement: string | null;
+        neighborhood: string | null;
+        city: string;
+        state: string | null;
+        postal_code: string | null;
+        created_at: string;
+        updated_at: string;
+    };
+}
+
 export namespace SupplierCategory {
     export type Model = {
         id: number;
@@ -31,5 +46,6 @@ export namespace Supplier {
         deleted_at: string | null;
         category?: SupplierCategory.Model | null;
         people?: Person.Model[];
+        address?: SupplierAddress.Model | null;
     };
 }

@@ -15,7 +15,6 @@ class SupplierAddress extends Model
         'neighborhood',
         'city',
         'state',
-        'country',
         'postal_code',
     ];
 

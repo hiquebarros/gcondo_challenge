@@ -14,7 +14,6 @@ class SupplierAddresses extends AbstractMigration
             ->addColumn('neighborhood', 'string')
             ->addColumn('city', 'string', ['null' => false])
             ->addColumn('state', 'string', ['limit' => 2])
-            ->addColumn('country', 'string')
             ->addColumn('postal_code', 'string', ['limit' => 8]);
 
         PhinxHelper::setDatetimeColumns($table);

@@ -17,6 +17,17 @@ export namespace FindSupplier {
         | Service.ExceptionResponse;
 }
 
+export type SupplierAddressBody = {
+    street: string;
+    number?: string;
+    complement?: string;
+    neighborhood?: string;
+    city: string;
+    state?: string;
+    country?: string;
+    postal_code: string;
+};
+
 export namespace CreateSupplier {
     export type Body = {
         legal_name: string;
@@ -25,6 +36,7 @@ export namespace CreateSupplier {
         email: string;
         supplier_category_id?: number | null;
         person_ids?: number[];
+        address: SupplierAddressBody;
     };
 
     type Data = { supplier: Supplier.Model };
