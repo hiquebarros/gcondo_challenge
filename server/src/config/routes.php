@@ -14,54 +14,53 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 
 return function (App $app) {
-    $app->options('/{routes:.*}', function (Request $request, Response $response) {
-        // CORS Pre-Flight OPTIONS Request Handler
+    $app->options('/api/{routes:.*}', function (Request $request, Response $response) {
         return $response;
     });
 
-    $app->post('/login', [AuthController::class, 'login']);
-    $app->post('/logout', [AuthController::class, 'logout'])->add(RequireAuthMiddleware::class);
-    $app->get('/auth/me', [AuthController::class, 'me'])->add(RequireAuthMiddleware::class);
+    $app->group('/api', function (RouteCollectorProxy $group) {
+        $group->get('', function (Request $request, Response $response) {
+            $data = ['message' => 'Welcome to the Gcondo Slim REST API'];
+            $response = ResponseBuilder::respondWithData($response, data: $data);
+            return $response;
+        });
 
-    $app->get('/', function (Request $request, Response $response) {
-        $data = ['message' => 'Welcome to the Gcondo Slim REST API'];
+        $group->post('/login', [AuthController::class, 'login']);
+        $group->post('/logout', [AuthController::class, 'logout'])->add(RequireAuthMiddleware::class);
+        $group->get('/auth/me', [AuthController::class, 'me'])->add(RequireAuthMiddleware::class);
 
-        $response = ResponseBuilder::respondWithData($response, data: $data);
+        $group->group('/condominiums', function (RouteCollectorProxy $g) {
+            $g->get('', [CondominiumController::class, 'list']);
+            $g->get('/{id}', [CondominiumController::class, 'find']);
+            $g->post('', [CondominiumController::class, 'create']);
+            $g->put('/{id}', [CondominiumController::class, 'update']);
+            $g->delete('/{id}', [CondominiumController::class, 'delete']);
+        })->add(RequireAuthMiddleware::class);
 
-        return $response;
-    });
+        $group->group('/units', function (RouteCollectorProxy $g) {
+            $g->get('', [UnitController::class, 'list']);
+            $g->get('/{id}', [UnitController::class, 'find']);
+            $g->post('', [UnitController::class, 'create']);
+            $g->put('/{id}', [UnitController::class, 'update']);
+            $g->delete('/{id}', [UnitController::class, 'delete']);
+        });
 
-    $app->group('/condominiums', function (RouteCollectorProxy $group) {
-        $group->get('', [CondominiumController::class, 'list']);
-        $group->get('/{id}', [CondominiumController::class, 'find']);
-        $group->post('', [CondominiumController::class, 'create']);
-        $group->put('/{id}', [CondominiumController::class, 'update']);
-        $group->delete('/{id}', [CondominiumController::class, 'delete']);
-    });
+        $group->group('/people', function (RouteCollectorProxy $g) {
+            $g->get('', [PersonController::class, 'list']);
+            $g->get('/{id}', [PersonController::class, 'find']);
+            $g->post('', [PersonController::class, 'create']);
+            $g->put('/{id}', [PersonController::class, 'update']);
+            $g->delete('/{id}', [PersonController::class, 'delete']);
+        });
 
-    $app->group('/units', function (RouteCollectorProxy $group) {
-        $group->get('', [UnitController::class, 'list']);
-        $group->get('/{id}', [UnitController::class, 'find']);
-        $group->post('', [UnitController::class, 'create']);
-        $group->put('/{id}', [UnitController::class, 'update']);
-        $group->delete('/{id}', [UnitController::class, 'delete']);
-    });
+        $group->get('/supplier-categories', [SupplierCategoryController::class, 'list']);
 
-    $app->group('/people', function (RouteCollectorProxy $group) {
-        $group->get('', [PersonController::class, 'list']);
-        $group->get('/{id}', [PersonController::class, 'find']);
-        $group->post('', [PersonController::class, 'create']);
-        $group->put('/{id}', [PersonController::class, 'update']);
-        $group->delete('/{id}', [PersonController::class, 'delete']);
-    });
-
-    $app->get('/supplier-categories', [SupplierCategoryController::class, 'list']);
-
-    $app->group('/suppliers', function (RouteCollectorProxy $group) {
-        $group->get('', [SupplierController::class, 'list']);
-        $group->get('/{id}', [SupplierController::class, 'find']);
-        $group->post('', [SupplierController::class, 'create']);
-        $group->put('/{id}', [SupplierController::class, 'update']);
-        $group->delete('/{id}', [SupplierController::class, 'delete']);
+        $group->group('/suppliers', function (RouteCollectorProxy $g) {
+            $g->get('', [SupplierController::class, 'list']);
+            $g->get('/{id}', [SupplierController::class, 'find']);
+            $g->post('', [SupplierController::class, 'create']);
+            $g->put('/{id}', [SupplierController::class, 'update']);
+            $g->delete('/{id}', [SupplierController::class, 'delete']);
+        });
     });
 };
