@@ -37,16 +37,7 @@ class UsersSeeder extends AbstractSeed
                 'created_at' => $now,
                 'updated_at' => $now,
                 'deleted_at' => null,
-            ],
-            [
-                'name' => 'Coordenador',
-                'email' => 'coordenacao@gcondo.com',
-                'password_hash' => $passwordHash,
-                'role' => 'coordenacao',
-                'created_at' => $now,
-                'updated_at' => $now,
-                'deleted_at' => null,
-            ],
+            ]
         ];
 
         $this->table('users')->insert($data)->save();

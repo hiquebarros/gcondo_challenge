@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class User extends Model
 {
     public const ROLE_PESSOA_OPERACAO = 'pessoa_operacao';
-    public const ROLE_COORDENACAO = 'coordenacao';
     public const ROLE_EQUIPE_INTERNA = 'equipe_interna';
     
     protected $table = 'users';
