@@ -4,6 +4,7 @@ type Route = `/${string}`;
 type Method = 'get' | 'post' | 'patch' | 'put' | 'delete';
 
 export const BASE_URL = import.meta.env.VITE_API_URL;
+//export const BASE_URL = "/api"
 
 const DEFAULT_HEADERS: Record<string, string> = {
     Accept: 'application/json',
@@ -44,7 +45,6 @@ async function call(route: Route, method: Method, data: unknown, params?: Record
 
     try {
         const response = await fetch(input, init);
-
         const data = await response.json();
 
         return data;

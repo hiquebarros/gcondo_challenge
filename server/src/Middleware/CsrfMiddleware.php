@@ -30,7 +30,9 @@ class CsrfMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        $path = rtrim($request->getUri()->getPath(), '/') ?: '/';
+        $path = rtrim($request->getUri()->getPath(), '/') ?: '/'; //remove /api from path if exists
+        $path = str_replace('/api', '', $path);
+        
         if ($path === '/login') {
             return $handler->handle($request);
         }

@@ -15,5 +15,12 @@ export default defineConfig({
         https: true,
         strictPort: true,
         port: 5173,
+        proxy: {
+            '/api': {
+                target: 'http://nginx:80',
+                changeOrigin: true,
+                secure: false,
+            },
+        },
     },
 });
