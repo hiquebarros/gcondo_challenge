@@ -10,11 +10,12 @@ import type {
 import { Request } from './Request';
 
 function filterToParams(filter: Person.Filter): Record<string, string> {
-    return {
-        full_name: filter.full_name,
-        cpf: filter.cpf,
-        email: filter.email,
-    };
+    const params: Record<string, string> = {};
+    if (filter.full_name != null && filter.full_name !== '') params.full_name = filter.full_name;
+    if (filter.cpf != null && filter.cpf !== '') params.cpf = filter.cpf;
+    if (filter.email != null && filter.email !== '') params.email = filter.email;
+    if (filter.limit != null && filter.limit > 0) params.limit = String(filter.limit);
+    return params;
 }
 
 export const listPeople = (filter?: Person.Filter): Promise<ListPeople.Response> =>

@@ -17,9 +17,10 @@ class PersonController
         $params = $request->getQueryParams();
 
         $filters = [
-            'full_name' => trim($params['full_name'] ?? ''),
+            'full_name' => trim($params['full_name'] ?? $params['q'] ?? ''),
             'cpf' => trim($params['cpf'] ?? ''),
             'email' => trim($params['email'] ?? ''),
+            'limit' => isset($params['limit']) ? (int) $params['limit'] : null,
         ];
 
         $data = ['people' => $this->service->list($filters)];

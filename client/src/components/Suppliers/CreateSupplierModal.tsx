@@ -1,14 +1,24 @@
-import { useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { App, Col, Divider, Form, Input, Modal, Row, Select } from 'antd';
 
 import { CnpjInput } from '@components/Suppliers/CnpjInput';
 import { useSuppliersContext } from '@contexts/Suppliers.context';
 import { handleServiceError, hasServiceError } from '@helpers/Service.helper';
+import { useDebouncedCallback } from '@lib/useDebouncedCallback';
 import { sleep } from '@lib/Sleep';
+import { listPeople } from '@services/Person.service';
 import { createSupplier } from '@services/Supplier.service';
 import type { SupplierAddressBody } from '@services/contracts/Supplier.contract';
 import { fetchCompanyByCnpj, formatCep } from '@services/Receitaws.service';
+import type { Person } from '@internal-types/Person.type';
+
+const PERSON_SEARCH_LIMIT = 20;
+const PERSON_SEARCH_DEBOUNCE_MS = 350;
+
+function personToOption(p: Person.Model) {
+    return { value: p.id, label: `${p.full_name} (${p.email})` };
+}
 
 export type CreateSupplierValues = {
     legal_name: string;
@@ -23,13 +33,49 @@ export type CreateSupplierValues = {
 export function CreateSupplierModal() {
     const [isSending, setIsSending] = useState(false);
     const [cnpjLoading, setCnpjLoading] = useState(false);
+    const [personSearchOptions, setPersonSearchOptions] = useState<{ value: number; label: string }[]>([]);
+    const [personSearchLoading, setPersonSearchLoading] = useState(false);
+    const personOptionMapRef = useRef<Record<number, { value: number; label: string }>>({});
     const lastFetchedCnpjRef = useRef<string | null>(null);
 
-    const { setIsCreateModalVisible, fetchSuppliers, supplierCategories, people } = useSuppliersContext();
+    const { setIsCreateModalVisible, fetchSuppliers, supplierCategories } = useSuppliersContext();
 
     const [form] = Form.useForm<CreateSupplierValues>();
 
     const app = App.useApp();
+
+    const fetchPersonOptions = useCallback(async (search: string) => {
+        setPersonSearchLoading(true);
+        const response = await listPeople({
+            full_name: search.trim(),
+            limit: PERSON_SEARCH_LIMIT,
+        });
+        setPersonSearchLoading(false);
+        if (hasServiceError(response)) {
+            setPersonSearchOptions([]);
+            return;
+        }
+        const list = response.data.people;
+        const options = list.map(personToOption);
+        list.forEach(p => {
+            personOptionMapRef.current[p.id] = personToOption(p);
+        });
+        setPersonSearchOptions(options);
+    }, []);
+
+    const searchPeople = useDebouncedCallback(fetchPersonOptions, PERSON_SEARCH_DEBOUNCE_MS);
+
+    const personIds = Form.useWatch('person_ids', form) ?? [];
+
+    const personSelectOptions = useMemo(() => {
+        const ids = (personIds ?? []) as number[];
+        const fromMap = ids
+            .map((id: number) => personOptionMapRef.current[id])
+            .filter(Boolean);
+        const fromMapIds = new Set(fromMap.map(o => o.value));
+        const fromSearch = personSearchOptions.filter(o => !fromMapIds.has(o.value));
+        return [...fromMap, ...fromSearch];
+    }, [personSearchOptions, personIds]);
 
     const close = () => {
         lastFetchedCnpjRef.current = null;
@@ -181,9 +227,14 @@ export function CreateSupplierModal() {
                         >
                             <Select
                                 mode="multiple"
-                                placeholder="Selecione as pessoas"
+                                placeholder="Digite para buscar pessoas"
                                 allowClear
-                                options={people.map(p => ({ value: p.id, label: `${p.full_name} (${p.email})` }))}
+                                showSearch
+                                filterOption={false}
+                                onSearch={searchPeople}
+                                options={personSelectOptions}
+                                loading={personSearchLoading}
+                                notFoundContent={personSearchLoading ? 'Buscando...' : 'Digite para buscar'}
                             />
                         </Form.Item>
                     </Col>
@@ -233,20 +284,25 @@ export function CreateSupplierModal() {
                             <Input placeholder="Bairro" />
                         </Form.Item>
 
-                        <Form.Item<CreateSupplierValues>
-                            name={['address', 'city']}
-                            label="Cidade"
-                            rules={[{ required: true, message: 'Informe a cidade.' }]}
-                        >
-                            <Input placeholder="Cidade" />
-                        </Form.Item>
-
-                        <Form.Item<CreateSupplierValues>
-                            name={['address', 'state']}
-                            label="Estado (UF)"
-                        >
-                            <Input placeholder="UF" maxLength={2} style={{ width: 64 }} />
-                        </Form.Item>
+                        <Row gutter={12}>
+                            <Col flex="1">
+                                <Form.Item<CreateSupplierValues>
+                                    name={['address', 'city']}
+                                    label="Cidade"
+                                    rules={[{ required: true, message: 'Informe a cidade.' }]}
+                                >
+                                    <Input placeholder="Cidade" />
+                                </Form.Item>
+                            </Col>
+                            <Col style={{ width: 72 }}>
+                                <Form.Item<CreateSupplierValues>
+                                    name={['address', 'state']}
+                                    label="UF"
+                                >
+                                    <Input placeholder="UF" maxLength={2} />
+                                </Form.Item>
+                            </Col>
+                        </Row>
 
                     </Col>
                 </Row>

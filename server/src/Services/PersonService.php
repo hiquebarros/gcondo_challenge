@@ -11,16 +11,18 @@ class PersonService
 {
     /**
      * List people with optional filters (case insensitive, LIKE / partial match).
+     * Optional limit for search-as-you-type (e.g. 20).
      *
-     * @param array{full_name?: string, cpf?: string, email?: string} $filters
+     * @param array{full_name?: string, cpf?: string, email?: string, limit?: int} $filters
      */
     public function list(array $filters = []): \Illuminate\Database\Eloquent\Collection
     {
         $query = Person::query();
 
-        $fullName = $filters['full_name'] ?? '';
-        $cpf = $filters['cpf'] ?? '';
-        $email = $filters['email'] ?? '';
+        $fullName = trim($filters['full_name'] ?? '');
+        $cpf = trim($filters['cpf'] ?? '');
+        $email = trim($filters['email'] ?? '');
+        $limit = isset($filters['limit']) ? (int) $filters['limit'] : null;
 
         if ($fullName !== '') {
             $query->whereRaw('LOWER(full_name) LIKE ?', ['%' . mb_strtolower($fullName) . '%']);
@@ -30,6 +32,10 @@ class PersonService
         }
         if ($email !== '') {
             $query->whereRaw('LOWER(email) LIKE ?', ['%' . mb_strtolower($email) . '%']);
+        }
+
+        if ($limit !== null && $limit > 0) {
+            $query->limit($limit);
         }
 
         return $query->get();

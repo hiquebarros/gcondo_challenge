@@ -1,8 +1,10 @@
 export namespace Person {
     export type Filter = {
-        full_name: string;
-        cpf: string;
-        email: string;
+        full_name?: string;
+        cpf?: string;
+        email?: string;
+        /** Optional limit for search (e.g. 20). */
+        limit?: number;
     };
 
     export type Model = {
