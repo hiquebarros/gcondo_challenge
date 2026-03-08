@@ -44,10 +44,11 @@ $app = AppFactory::create();
 
 $app->addBodyParsingMiddleware();
 
-$app->add(SessionMiddleware::class);
-$app->add(CsrfMiddleware::class);
-
 $app->addRoutingMiddleware();
+
+// Session must run before Csrf (Slim LIFO: last added runs first)
+$app->add(CsrfMiddleware::class);
+$app->add(SessionMiddleware::class);
 
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
