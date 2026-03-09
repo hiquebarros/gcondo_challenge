@@ -11,20 +11,26 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-// Required to production environment, but not to local development
-$dotenv = Dotenv::createImmutable(__DIR__);
+$env = $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? 'local';
+
+$envFile = $env === 'testing'
+    ? '.env.testing'
+    : '.env.dev';
+
+$dotenv = Dotenv::createImmutable(dirname(__DIR__), $envFile);
 $dotenv->safeLoad();
 
-$dotenv->required([
-    'DATABASE_DRIVER',
-    'DATABASE_HOST',
-    'DATABASE_PORT',
-    'DATABASE_NAME',
-    'DATABASE_USERNAME',
-    'DATABASE_PASSWORD',
-
-    'CORS_ALLOWED_ORIGIN',
-]);
+if ($env !== 'testing') {
+    $dotenv->required([
+        'DATABASE_DRIVER',
+        'DATABASE_HOST',
+        'DATABASE_PORT',
+        'DATABASE_NAME',
+        'DATABASE_USERNAME',
+        'DATABASE_PASSWORD',
+        'CORS_ALLOWED_ORIGIN',
+    ]);
+}
 
 $container = new Container();
 
@@ -36,6 +42,13 @@ $container->set('database', function () {
     $capsule->bootEloquent();
 
     return $capsule;
+});
+
+$container->set('pdo', function (Container $container) {
+
+    $capsule = $container->get('database');
+
+    return $capsule->getConnection()->getPdo();
 });
 
 AppFactory::setContainer($container);

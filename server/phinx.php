@@ -5,7 +5,6 @@ use Dotenv\Dotenv;
 // Required to production environment, but not to local development
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->safeLoad();
-
 $dotenv->required([
     'DATABASE_DRIVER',
     'DATABASE_HOST',
@@ -30,6 +29,10 @@ return [
             'pass' => $_ENV['DATABASE_PASSWORD'],
             'name' => $_ENV['DATABASE_NAME'],
             'charset' => 'utf8',
-        ]
+        ],  
+        'testing' => [
+            'adapter' => 'sqlite',
+            'name' => __DIR__ . '/tests/database',
+        ],
     ]
 ];
