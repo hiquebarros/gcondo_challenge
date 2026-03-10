@@ -3,6 +3,9 @@
 use App\Controllers\AuthController;
 use App\Controllers\CondominiumController;
 use App\Controllers\PersonController;
+use App\Controllers\QuoteCategoryController;
+use App\Controllers\QuoteController;
+use App\Controllers\QuoteStatusController;
 use App\Controllers\SupplierCategoryController;
 use App\Controllers\SupplierController;
 use App\Controllers\UnitController;
@@ -43,7 +46,7 @@ return function (App $app) {
             $g->post('', [UnitController::class, 'create']);
             $g->put('/{id}', [UnitController::class, 'update']);
             $g->delete('/{id}', [UnitController::class, 'delete']);
-        });
+        })->add(RequireAuthMiddleware::class);
 
         $group->group('/people', function (RouteCollectorProxy $g) {
             $g->get('', [PersonController::class, 'list']);
@@ -51,7 +54,7 @@ return function (App $app) {
             $g->post('', [PersonController::class, 'create']);
             $g->put('/{id}', [PersonController::class, 'update']);
             $g->delete('/{id}', [PersonController::class, 'delete']);
-        });
+        })->add(RequireAuthMiddleware::class);
 
         $group->get('/supplier-categories', [SupplierCategoryController::class, 'list']);
 
@@ -61,6 +64,14 @@ return function (App $app) {
             $g->post('', [SupplierController::class, 'create']);
             $g->put('/{id}', [SupplierController::class, 'update']);
             $g->delete('/{id}', [SupplierController::class, 'delete']);
-        });
+        })->add(RequireAuthMiddleware::class);
+
+        $group->get('/quote-categories', [QuoteCategoryController::class, 'list'])->add(RequireAuthMiddleware::class);
+        $group->get('/quote-statuses', [QuoteStatusController::class, 'list'])->add(RequireAuthMiddleware::class);
+
+        $group->group('/quotes', function (RouteCollectorProxy $g) {
+            $g->get('', [QuoteController::class, 'list']);
+            $g->post('', [QuoteController::class, 'create']);
+        })->add(RequireAuthMiddleware::class);
     });
 };

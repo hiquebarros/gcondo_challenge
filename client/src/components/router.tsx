@@ -4,6 +4,7 @@ import { Condominiums } from '@pages/Condominiums.page';
 import { Dashboard } from '@pages/Dashboard.page';
 import { Login } from '@pages/Login.page';
 import { People } from '@pages/People.page';
+import { Quotes } from '@pages/Quotes.page';
 import { Suppliers } from '@pages/Suppliers.page';
 
 import { MainLayout } from './MainLayout';
@@ -39,6 +40,10 @@ export const router = createBrowserRouter([
             {
                 path: '/suppliers',
                 element: <Suppliers />,
+            },
+            {
+                path: '/quotes',
+                element: <Quotes />,
             },
         ]
     },

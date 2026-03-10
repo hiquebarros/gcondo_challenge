@@ -2,7 +2,7 @@ import { useLocation, useNavigate, useNavigation } from 'react-router';
 
 import { type GetProp, type MenuProps, Spin } from 'antd';
 
-import { BuildOutlined, HomeOutlined, LogoutOutlined, ShopOutlined, UserOutlined } from '@ant-design/icons';
+import { BuildOutlined, FileTextOutlined, HomeOutlined, LogoutOutlined, ShopOutlined, UserOutlined } from '@ant-design/icons';
 import { Layout } from '@components/Layout';
 import { useAuth } from '@contexts/Auth.context';
 
@@ -47,6 +47,13 @@ export function MainLayout() {
         onClick: () => navigate('/suppliers'),
     };
 
+    const quotesItem: Item = {
+        key: '/quotes',
+        icon: <FileTextOutlined />,
+        label: 'Orçamentos',
+        onClick: () => navigate('/quotes'),
+    };
+
     const logoutItem: Item = {
         key: 'logout',
         icon: <LogoutOutlined />,
@@ -59,6 +66,7 @@ export function MainLayout() {
         condominiumsItem,
         peopleItem,
         suppliersItem,
+        quotesItem,
         logoutItem,
     ];
 
