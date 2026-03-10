@@ -8,6 +8,7 @@ import { EditCondominiumModal } from '@components/Condominiums/EditCondominiumMo
 import { Table } from '@components/Table';
 import { CondominiumsContextProvider } from '@contexts/Condominiums.context';
 import type { Condominium } from '@internal-types/Condominium.type';
+import { formatCep } from '@services/Receitaws.service';
 import { Show } from '@lib/Show';
 
 const COLUMNS: TableColumnsType<Condominium.Model> = [
@@ -25,6 +26,7 @@ const COLUMNS: TableColumnsType<Condominium.Model> = [
     {
         title: 'CEP',
         dataIndex: 'zip_code',
+        render: (value: string | null | undefined) => value ? formatCep(value) : '—',
     },
 
     {
