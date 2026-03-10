@@ -1,0 +1,18 @@
+.layout-sider-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: #000000;
+}
+
+.layout-sider-logo img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.ant-menu-dark.layout-sider-menu .ant-menu-item-selected {
+    background-color: #36bc49 !important;
+}

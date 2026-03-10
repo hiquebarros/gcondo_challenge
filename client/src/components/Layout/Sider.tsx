@@ -3,6 +3,10 @@ import AntdSider from 'antd/es/layout/Sider';
 
 import type { RenderSiderProps } from './Root';
 
+import logoUrl from '../../assets/logo.webp';
+
+import './Sider.css';
+
 type SiderProps = RenderSiderProps & Pick<MenuProps, 'items' | 'defaultSelectedKeys'>;
 
 export function Sider({ collapsed, onCollapse, items, defaultSelectedKeys }: SiderProps) {
@@ -16,7 +20,11 @@ export function Sider({ collapsed, onCollapse, items, defaultSelectedKeys }: Sid
             onCollapse={onCollapse}
             style={{ background: token.colorBgContainer }}
         >
+            <div className="layout-sider-logo">
+                <img src={logoUrl} alt="Logo" />
+            </div>
             <AntdMenu
+                className="layout-sider-menu"
                 mode="inline"
                 theme="dark"
                 items={items}
