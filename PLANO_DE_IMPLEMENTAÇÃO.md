@@ -33,7 +33,6 @@ Identifiquei dois perfis principais:
 - Pode editar pessoas
 - Pode cadastrar fornecedores
 - Pode visualizar todos os fornecedores
-- Pode editar fornecedores
 - Pode cadastrar orçamentos
 - Pode visualizar orçamentos
 - Pode editar orçamentos

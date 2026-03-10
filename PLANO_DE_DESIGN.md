@@ -21,6 +21,6 @@ O software que será construído que um software de gestão, ou seja, terá pred
 
 O PRD define features de escopo de usuário, mas acaba não definindo os tipos de usuário, e quando cita, não aprofunda. Nesse sentido, foi decidido que o sistema teria 2 escopos de usuário, a "pessoa da operação" e "equipe interna". O sistema está completamente condicionado partindo desses dois perfis, desde o dashboard até o orçamento. No dash, por exemplo, a equipe interna tem visão geral, já a "pessoa da operação" vê apenas o que é dela. Assim como a "pessoa da operação" lista apenas seus condominios e orçamentos nos respectivos módulos, diferente da "equipe interna", que pode ver tudo, e também editar tudo.
 
-Outra questão foi que o PRD não define se o admin poderia criar condominios ou orçamentos. Em questão de negócio/sistema não faria sentido, mas foi decidido não limitar a capacidade do admin.
+Outra questão foi que o PRD não define se o admin poderia criar condominios ou orçamentos. Em questão de negócio/sistema não faria sentido, mas foi decidido não limitar a capacidade do admin. Apenas funcionalidade de edição/deleção de fornecedores não foi desenvolvida para o admin.
 
 Também foram assumidos riscos técnicos, que serão explicados no plano de implementação. (PLANO_DE_IMPLEMENTACAO.md)
