@@ -1,173 +1,132 @@
-# Gcondo Slim ⚡️
+# Projeto — Setup e Execução
 
-Este projeto é dedicado à etapa técnica do processo seletivo para novos desenvolvedores.
+Este documento descreve como executar o projeto localmente utilizando **Docker**, preparar o banco de dados e rodar os testes automatizados.
 
-> [!IMPORTANT]
-> **Aviso para colaboradores Gcondo** \
-> A *branch* `main` não deve ser enviada para os candidatos. \
-> O repositório possui *branches* dedicadas para cada etapa do processo seletivo.
+# Requisitos
 
-## Ambiente de desenvolvimento local
+Antes de iniciar, é necessário ter instalado:
 
-Por padrão, os candidatos recebem o projeto como um arquivo compactado.
+- Docker
+- Docker Compose
 
-> [!TIP]
-> Você pode usar qualquer sistema operacional, seja ele **Windows** ou **Linux**.\
-> Essa é a magia do **Docker** 🐳
+# Setup do Projeto
 
-### Requisitos
+Para garantir que o ambiente seja reproduzível e evitar problemas com volumes persistentes do Docker, recomenda-se iniciar o projeto com um **reset completo dos containers e volumes**.
 
-- Uma ferramenta para descompactar o arquivo compactado, como **WinRAR** ou **7-Zip**
-- Uma **IDE**, como **Visual Studio Code**
-- **Docker** e **Docker Compose**
+## 1. Reset do ambiente Docker
 
-### Sugestões
-
-- Uma ferramenta para acessar e visualizar o banco de dados do projeto, como **Beekeeper**
-  - ![Conectando no banco dados do projeto pelo Beekeeper](assets/beekeeper-database-connection.png)
-- Extensões para o **Visual Studio Code**
-  - [Docker](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker)
-  - [PHP Intelephense](https://marketplace.visualstudio.com/items?itemName=bmewburn.vscode-intelephense-client)
-  - [Error Lens](https://marketplace.visualstudio.com/items?itemName=usernamehw.errorlens)
-  - [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one)
-
-### Instalação
-
-1. Descompactar o arquivo compactado em um local de sua escolha
-2. Acessar o local escolhido no passo anterior
-3. Inicializar os containers
-    ```bash
-    docker compose up -d
-    ```
-4. Acessar o container da **API**
-    ```bash
-    docker compose exec api bash
-    ```   
-5. Instalar as dependências com **Composer**
-    ```bash
-    composer install
-    ```   
-6. Configurar o banco de dados com **Phinx**
-    ```bash
-    composer run phinx:migrate
-    ```
-
-**A API estará disponível em http://localhost:8080 e o front-end em https://localhost:5100 ⚡️**
-
-#### Como derrubar os containers?
+Execute:
 
 ```bash
-docker compose stop
+docker compose down -v
 ```
 
-#### Como subir os containers novamente?
+Esse comando:
+
+- remove os containers
+- remove os volumes do projeto
+- garante que o banco de dados seja recriado do zero
+
+---
+
+## 2. Subir os containers
+
+Execute:
 
 ```bash
 docker compose up -d
 ```
 
-### Insomnia
+Isso iniciará todos os serviços definidos no `docker-compose.yml`.
 
-> [!NOTE]
-> Você pode usar outras ferramentas, como **Postman**, mas sugerimos **fortemente** que use o **Insomnia**, já que a coleção está pronta e configurada, facilitando muito o seu trabalho.
+---
 
-1. Abra o **Insomnia**
-2. Clique em **"Create"** e escolha **"File"** -> **"Import"** -> **"From File"**
-3. Selecione o arquivo `server/insomnia.json`.
-  
-Todas as rotas estarão disponíveis para teste 💫
+## 3. Executar as migrations
 
-## Contexto da etapa técnica
+Após os containers estarem rodando, execute:
 
-A proposta desta etapa é simular um cenário real de trabalho com autonomia de análise, documentação, implementação e validação.
+```bash
+vendor/bin/phinx migrate
+```
 
-Durante esta etapa, você deve:
+Esse comando cria todas as tabelas necessárias no banco de dados.
 
-1. Interpretar um **PRD** em linguagem de produto;
-2. Documentar seu entendimento em um *design plan*;
-3. Implementar a solução;
-4. Opcionalmente validar os fluxos com testes automatizados;
-5. Responder o formulário obrigatório ao final.
+---
 
-O PRD desta etapa está em [MINI_PRD.md](MINI_PRD.md).
+## 4. Popular o banco com dados iniciais
 
-## Processo da entrega
+Execute:
 
-### Plano de design
+```bash
+vendor/bin/phinx seed:run -s OrderedSeeder
+```
 
-O plano de design é um documento simples que pode ser feito por humanos ou por inteligência artificiais, como **Claude Code**. Ele é basicamente a ideia do que você deseja implementar em código, mas antes de iniciar a implementação. É muito importante e utilizado para revisão, evitando retrabalho e falhas no projeto.
+Esse seeder cria dados iniciais necessários para funcionamento e testes do sistema.
 
-Também conhecido como *spec*. Neste caso em específico, ele é construído a partir de um PRD, mas nem sempre é o caso.
+---
 
-Não tem resposta certa ou perfeita para este assunto, então fique tranquilo.
+## 5. Checar aplicação
 
-Você deve criar um arquivo em **Markdown** no repositório explicando, de forma objetiva:
+A aplicação fica disponível em https://localhost:5100
 
-1. O que você entendeu do PRD;
-2. O que pretende construir;
-3. Quais riscos e decisões considera importantes.
+# Informações importantes
 
-O nome e o caminho do arquivo são livres.
+## Usuários de Teste
 
-### Plano de implementação (Opcional)
+#### Este usuário representa alguém da equipe interna da plataforma, com permissões administrativas.
 
-O plano de implementação, diferente do plano de design, já é algo feito normalmente por inteligências artificiais, não sendo muito comum de ser feito por humanos. É mais comum que o plano de design já tenha partes do plano de implementação quando feito por humanos. 
+```
+vinicius@gcondo.com
+senha123
+```
 
-Você pode criar um segundo arquivo em **Markdown** com o plano de implementação. O nome e o caminho do arquivo também são livres.
+---
 
+#### Estes usuários representam pessoas responsáveis pela operação de condomínios dentro do sistema.
 
+```
+sindico@gcondo.com
+senha123
+```
+---
 
-## Testes automatizados (opcional)
+```
+sindico2@gcondo.com
+senha123
+```
 
-Os testes automatizados não são obrigatórios. A implementação do *PRD* e o preenchimento do formulário de encerramento são suficientes para a entrega.
+---
 
-A realização desta etapa será vista como um extra/bônus.
+# Rodando os Testes
 
-### Objetivo desta etapa
+Para executar os testes automatizados:
 
-Garantir que os principais fluxos de produto estejam cobertos por testes e que o comportamento esperado esteja validado de forma reproduzível.
+```bash
+vendor/bin/phpunit tests
+```
 
-### Liberdade de ferramenta
+Os testes garantem que as principais regras de negócio da aplicação estejam funcionando corretamente.
 
-Você pode escolher as ferramentas com as quais tem mais confiança, por exemplo: *Vitest*, *Jest*, *Cypress*, *Playwright*, *RTL*, *PHPUnit*, *Pest* ou testes de API com *Postman*/*Insomnia*.
+---
 
-### Cenários sugeridos
+# Fluxo Completo (Recomendado)
 
-1. Adicionar teste para criação de um novo condomínio.
-2. Adicionar teste para cadastro de pessoa.
-3. Adicionar teste para cadastro de fornecedor.
-4. Adicionar teste para criação de orçamento vinculado a fornecedor e condomínio.
-5. Adicionar teste para um cenário de falha relevante (por exemplo, vínculo inválido ou dado obrigatório ausente).
+Caso queira executar todo o processo de forma sequencial:
 
-## Formulário obrigatório de encerramento
+```bash
+docker compose down -v
+docker compose up -d
 
-O preenchimento do **Google Form** ao final da entrega é obrigatório.
+vendor/bin/phinx migrate
+vendor/bin/phinx seed:run -s OrderedSeeder
 
-> [!IMPORTANT]
-> Submissões sem formulário preenchido serão desconsideradas.
+vendor/bin/phpunit tests
+```
 
-Para acessar o formulário, clique [aqui](https://forms.gle/T74toUVYucQwTzdq9).
+---
 
-### Uso de agentes de IA
+# Observações
 
-Caso você escolha usar agentes de IA, como **Cursor** e **Claude Code**, é importante que a conversa seja exportada e enviada no formulário de encerramento. Isso permite entender melhor como você trabalha com agentes e como escreve *prompts*.
-
-## Tecnologias 🛠️
-
-O repositório possui dois diretórios principais, sendo `server` para a **API REST** e `client` para uma **Single Page Application (SPA)**, que consome a **API REST**.
-
-### Servidor 📚️
-
-- PHP 8.4
-- Slim 4.12
-- Phinx 0.15
-- Eloquent 12.0
-
-### Cliente 💻️
-
-- React 19
-- Ant Design 5
-- TypeScript 5
-- Dayjs 1
-- React Router 7
-- Vite# gcondo_challenge
+- O uso de `docker compose down -v` é importante para evitar problemas com **volumes persistentes**, especialmente relacionados ao banco de dados.
+- Caso o banco já exista no volume Docker, migrations ou seeds podem falhar devido a dados pré-existentes.
+- Reiniciar os volumes garante um ambiente limpo e reproduzível.
