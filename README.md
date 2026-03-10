@@ -67,7 +67,7 @@ Esse seeder cria dados iniciais necessários para funcionamento e testes do sist
 
 ## 5. Checar aplicação
 
-A aplicação fica disponível em https://localhost:5100
+A aplicação fica disponível  na porta 5100. É importante acessar pela rota de login via [https://localhost:5100/login](https://localhost:5100)
 
 # Informações importantes
 
@@ -88,6 +88,7 @@ senha123
 sindico@gcondo.com
 senha123
 ```
+
 ---
 
 ```
@@ -130,3 +131,4 @@ vendor/bin/phpunit tests
 - O uso de `docker compose down -v` é importante para evitar problemas com **volumes persistentes**, especialmente relacionados ao banco de dados.
 - Caso o banco já exista no volume Docker, migrations ou seeds podem falhar devido a dados pré-existentes.
 - Reiniciar os volumes garante um ambiente limpo e reproduzível.
+

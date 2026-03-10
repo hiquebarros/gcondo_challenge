@@ -57,4 +57,4 @@ O grande desafio foi fazer o cookie chegar na API, já que a API roda em HTTP e 
 
 Os testes serão desenvolvidos utilizando php unit e terão o intuito apenas de mostrar capacidade técnica de montar ambiente de testes e testar funcionalidades.
 
-![Diagrama ER do banco de dados](db_diagram.png)
+![Resultado testes](tests_feedback.png)
