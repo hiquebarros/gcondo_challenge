@@ -9,6 +9,7 @@ import { Table } from '@components/Table';
 import { useAuth } from '@contexts/Auth.context';
 import { SuppliersContextProvider } from '@contexts/Suppliers.context';
 import type { Supplier } from '@internal-types/Supplier.type';
+import { cnpjDigits, formatCnpj as formatCnpjMask } from '@lib/cnpjMask';
 import { Show } from '@lib/Show';
 
 const DECLARATION_EDIT_INTERNAL =
@@ -104,11 +105,13 @@ export function Suppliers() {
                             </Col>
                             <Col xs={24} sm={5}>
                                 <Input
-                                    placeholder="CNPJ"
-                                    value={filter.cnpj}
-                                    onChange={e => setFilter(f => ({ ...f, cnpj: e.target.value }))}
+                                    placeholder="00.000.000/0000-00"
+                                    value={formatCnpjMask(filter.cnpj)}
+                                    onChange={e => setFilter(f => ({ ...f, cnpj: cnpjDigits(e.target.value) }))}
                                     onPressEnter={applyFilter}
                                     allowClear
+                                    inputMode="numeric"
+                                    maxLength={18}
                                 />
                             </Col>
                             <Col xs={24} sm={5}>

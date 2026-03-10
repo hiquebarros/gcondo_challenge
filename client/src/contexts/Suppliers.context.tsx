@@ -21,9 +21,10 @@ import { listPeople } from '@services/Person.service';
 import { listSuppliers } from '@services/Supplier.service';
 
 function filterFromSearchParams(searchParams: URLSearchParams): Supplier.Filter {
+    const cnpjRaw = searchParams.get('cnpj') ?? '';
     return {
         legal_name: searchParams.get('legal_name') ?? '',
-        cnpj: searchParams.get('cnpj') ?? '',
+        cnpj: cnpjRaw.replace(/\D/g, ''),
         email: searchParams.get('email') ?? '',
         supplier_category_id: searchParams.get('supplier_category_id') ?? '',
     };

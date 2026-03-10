@@ -14,9 +14,10 @@ export const listSupplierCategories = (): Promise<ListSupplierCategories.Respons
     Request.get('/supplier-categories');
 
 function filterToParams(filter: Supplier.Filter): Record<string, string> {
+    const cnpjDigits = (filter.cnpj ?? '').replace(/\D/g, '');
     const params: Record<string, string> = {
         legal_name: filter.legal_name,
-        cnpj: filter.cnpj,
+        cnpj: cnpjDigits,
         email: filter.email,
         supplier_category_id: filter.supplier_category_id,
     };

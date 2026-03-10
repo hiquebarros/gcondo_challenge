@@ -17,7 +17,7 @@ class SupplierService
         $query = Supplier::query()->with(['category', 'people', 'address']);
 
         $legalName = trim($filters['legal_name'] ?? '');
-        $cnpj = trim($filters['cnpj'] ?? '');
+        $cnpj = preg_replace('/\D/', '', trim($filters['cnpj'] ?? ''));
         $email = trim($filters['email'] ?? '');
         $categoryId = trim($filters['supplier_category_id'] ?? '');
 
@@ -25,7 +25,7 @@ class SupplierService
             $query->whereRaw('LOWER(legal_name) LIKE ?', ['%' . mb_strtolower($legalName) . '%']);
         }
         if ($cnpj !== '') {
-            $query->whereRaw('LOWER(cnpj) LIKE ?', ['%' . mb_strtolower($cnpj) . '%']);
+            $query->where('cnpj', 'LIKE', '%' . $cnpj . '%');
         }
         if ($email !== '') {
             $query->whereRaw('LOWER(email) LIKE ?', ['%' . mb_strtolower($email) . '%']);
