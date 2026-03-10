@@ -5,17 +5,24 @@ namespace App\Services;
 use App\Http\Error\HttpNotFoundException;
 use App\Http\Error\HttpUnprocessableEntityException;
 use App\Models\Unit;
+use App\Models\User;
 use App\Services\CondominiumService;
+use Illuminate\Database\Eloquent\Collection;
 
 class UnitService
 {
     public function __construct(protected CondominiumService $condominiumService) {}
 
-    public function list()
+    public function list(?User $user = null): Collection
     {
-        $units = Unit::with('condominium')->get();
+        $query = Unit::with('condominium');
 
-        return $units;
+        if ($user && !$user->canSeeAllCondominiums()) {
+            $condominiumIds = $user->condominiums()->pluck('condominiums.id');
+            $query->whereIn('condominium_id', $condominiumIds);
+        }
+
+        return $query->get();
     }
 
     public function listByCondominium(int $condominiumId)

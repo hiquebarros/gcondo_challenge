@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Http\HttpStatus;
 use App\Http\Response\ResponseBuilder;
+use App\Models\User;
 use App\Services\UnitService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -15,10 +16,12 @@ class UnitController
     public function list(Request $request, Response $response): Response
     {
         $params = $request->getQueryParams();
+        /** @var User|null $user */
+        $user = $request->getAttribute('user');
 
         $units = isset($params['condominium_id'])
-            ? $this->service->listByCondominium($params['condominium_id'])
-            : $this->service->list();
+            ? $this->service->listByCondominium((int) $params['condominium_id'])
+            : $this->service->list($user);
 
         $data = ['units' => $units];
 
