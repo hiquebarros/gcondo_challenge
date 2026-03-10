@@ -1,2 +1,4 @@
 node_modules/
 vendor/
+server/tests/database.sqlite3
+server/.phpunit.cache/

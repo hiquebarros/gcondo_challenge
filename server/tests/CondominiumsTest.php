@@ -7,21 +7,20 @@ namespace App\Tests\Integration;
 use App\Models\User;
 use App\Tests\ApiTestCase;
 
-class AuthenticatedRequestTest extends ApiTestCase
+class CondominiumsTest extends ApiTestCase
 {
-    public function test_authenticated_request(): void
+    public function test_sindico_can_create_condominium(): void
     {
-        // Seed 1 user direto no banco (senha sempre senha123 para o login do teste)
         User::query()->updateOrCreate(
-            ['email' => 'admin@gcondo.com'],
+            ['email' => 'sindico@gcondo.com'],
             [
-                'name' => 'Administrador',
+                'name' => 'Síndico',
                 'password_hash' => password_hash('senha123', PASSWORD_BCRYPT),
-                'role' => 'equipe_interna',
+                'role' => 'pessoa_operacao',
             ]
         );
 
-        $this->login();
+        $this->login('sindico@gcondo.com');
 
         $response = $this->request(
             'POST',

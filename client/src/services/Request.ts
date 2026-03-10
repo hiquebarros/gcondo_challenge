@@ -3,8 +3,8 @@ import { getCsrfToken } from '@lib/csrfToken';
 type Route = `/${string}`;
 type Method = 'get' | 'post' | 'patch' | 'put' | 'delete';
 
-export const BASE_URL = import.meta.env.VITE_API_URL;
-//export const BASE_URL = "/api"
+export const BASE_URL = "/api";
+//export const BASE_URL = import.meta.env.VITE_API_URL;
 
 const DEFAULT_HEADERS: Record<string, string> = {
     Accept: 'application/json',

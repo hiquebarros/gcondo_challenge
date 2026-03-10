@@ -10,6 +10,7 @@ use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Factory\UriFactory;
 use Slim\Psr7\Request;
+use Illuminate\Database\Capsule\Manager as Capsule;
 
 abstract class ApiTestCase extends \PHPUnit\Framework\TestCase
 {
@@ -26,17 +27,45 @@ abstract class ApiTestCase extends \PHPUnit\Framework\TestCase
         return self::$app;
     }
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+    
+        $dbFile = __DIR__ . '/database.sqlite3';
+    
+        // fecha conexões abertas
+        if (class_exists(Capsule::class)) {
+            Capsule::connection()->disconnect();
+        }
+    
+        // remove banco antigo
+        if (file_exists($dbFile)) {
+            unlink($dbFile);
+        }
+    
+        // cria arquivo novo
+        touch($dbFile);
+    
+        // roda migrations
+        exec('vendor/bin/phinx migrate -e testing');
+    
+        // reinicia app
+        self::$app = null;
+    
+        self::resetAuth();
+    }
+
     /**
      * Login and store CSRF + cookie for subsequent requests.
      * Uses user from UsersSeeder: admin@gcondo.com / senha123
      */
-    protected function login(): void
+    protected function login(string $email = 'admin@gcondo.com'): void
     {
         if (self::$auth !== null) {
             return;
         }
         $response = $this->request('POST', '/api/login', [
-            'email' => 'admin@gcondo.com',
+            'email' => $email,
             'password' => 'senha123',
         ]);
         $responseBody = (string) $response->getBody();
