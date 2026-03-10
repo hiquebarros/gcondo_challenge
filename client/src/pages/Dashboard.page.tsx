@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useState } from 'react';
 
-import { App, Card, Col, Row } from 'antd';
+import { App, Card, Col, Row, Skeleton } from 'antd';
 
 import {
     AppstoreOutlined,
@@ -48,21 +48,32 @@ function CountCard({
     );
 }
 
+function CardSkeleton() {
+    return (
+        <Card size="small" style={{ height: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <Skeleton.Avatar active size={32} shape="square" />
+                <div style={{ flex: 1 }}>
+                    <Skeleton.Input active size="small" style={{ width: 48, marginBottom: 8 }} />
+                    <Skeleton.Input active size="small" block style={{ width: 80 }} />
+                </div>
+            </div>
+        </Card>
+    );
+}
+
 export function Dashboard() {
     const { user } = useAuth();
     const app = App.useApp();
-    const [counts, setCounts] = useState<Counts>({
-        units: 0,
-        condominiums: 0,
-        quotes: 0,
-        people: 0,
-        suppliers: 0,
-    });
+    const [isLoading, setIsLoading] = useState(true);
+    const [counts, setCounts] = useState<Counts | null>(null);
 
     useEffect(() => {
         let cancelled = false;
 
         async function load() {
+            setIsLoading(true);
+
             const [unitsRes, condosRes, quotesRes, peopleRes, suppliersRes] = await Promise.all([
                 listUnits(),
                 listCondominiums(),
@@ -90,6 +101,7 @@ export function Dashboard() {
                 people: hasServiceError(peopleRes) ? 0 : peopleRes.data.people.length,
                 suppliers: hasServiceError(suppliersRes) ? 0 : suppliersRes.data.suppliers.length,
             });
+            setIsLoading(false);
         }
 
         load();
@@ -109,41 +121,53 @@ export function Dashboard() {
             </div>
 
             <Row gutter={[16, 16]}>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                    <CountCard
-                        icon={<AppstoreOutlined />}
-                        count={counts.units}
-                        label="Unidades"
-                    />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                    <CountCard
-                        icon={<BuildOutlined />}
-                        count={counts.condominiums}
-                        label="Condomínios"
-                    />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                    <CountCard
-                        icon={<FileTextOutlined />}
-                        count={counts.quotes}
-                        label="Orçamentos"
-                    />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                    <CountCard
-                        icon={<UserOutlined />}
-                        count={counts.people}
-                        label="Pessoas"
-                    />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={6}>
-                    <CountCard
-                        icon={<ShopOutlined />}
-                        count={counts.suppliers}
-                        label="Fornecedores"
-                    />
-                </Col>
+                {isLoading ? (
+                    <>
+                        {[1, 2, 3, 4, 5].map(key => (
+                            <Col key={key} xs={24} sm={12} md={8} lg={6}>
+                                <CardSkeleton />
+                            </Col>
+                        ))}
+                    </>
+                ) : counts !== null ? (
+                    <>
+                        <Col xs={24} sm={12} md={8} lg={6}>
+                            <CountCard
+                                icon={<AppstoreOutlined />}
+                                count={counts.units}
+                                label="Unidades"
+                            />
+                        </Col>
+                        <Col xs={24} sm={12} md={8} lg={6}>
+                            <CountCard
+                                icon={<BuildOutlined />}
+                                count={counts.condominiums}
+                                label="Condomínios"
+                            />
+                        </Col>
+                        <Col xs={24} sm={12} md={8} lg={6}>
+                            <CountCard
+                                icon={<FileTextOutlined />}
+                                count={counts.quotes}
+                                label="Orçamentos"
+                            />
+                        </Col>
+                        <Col xs={24} sm={12} md={8} lg={6}>
+                            <CountCard
+                                icon={<UserOutlined />}
+                                count={counts.people}
+                                label="Pessoas"
+                            />
+                        </Col>
+                        <Col xs={24} sm={12} md={8} lg={6}>
+                            <CountCard
+                                icon={<ShopOutlined />}
+                                count={counts.suppliers}
+                                label="Fornecedores"
+                            />
+                        </Col>
+                    </>
+                ) : null}
             </Row>
         </div>
     );
