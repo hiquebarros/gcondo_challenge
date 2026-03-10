@@ -14,7 +14,10 @@ use Illuminate\Database\Eloquent\Collection;
 
 class QuoteService
 {
-    public function list(User $user): Collection
+    /**
+     * @param array{quote_category_id?: string, quote_status_id?: string, condominium_id?: string, supplier_id?: string} $filters
+     */
+    public function list(User $user, array $filters = []): Collection
     {
         $query = Quote::query()
             ->with(['condominium', 'supplier', 'quoteCategory', 'quoteStatus'])
@@ -25,7 +28,34 @@ class QuoteService
             $query->whereIn('condominium_id', $condominiumIds);
         }
 
+        $categoryId = trim($filters['quote_category_id'] ?? '');
+        if ($categoryId !== '') {
+            $query->where('quote_category_id', (int) $categoryId);
+        }
+        $statusId = trim($filters['quote_status_id'] ?? '');
+        if ($statusId !== '') {
+            $query->where('quote_status_id', (int) $statusId);
+        }
+        $condominiumId = trim($filters['condominium_id'] ?? '');
+        if ($condominiumId !== '') {
+            $query->where('condominium_id', (int) $condominiumId);
+        }
+        $supplierId = trim($filters['supplier_id'] ?? '');
+        if ($supplierId !== '') {
+            $query->where('supplier_id', (int) $supplierId);
+        }
+
         return $query->get();
+    }
+
+    public function find(int $id, User $user): Quote
+    {
+        $quote = Quote::with(['condominium', 'supplier', 'quoteCategory', 'quoteStatus'])->find($id);
+        if (!$quote) {
+            throw new HttpNotFoundException('Orcamento nao encontrado');
+        }
+        $this->ensureUserCanAccessCondominium($user, (int) $quote->condominium_id);
+        return $quote;
     }
 
     public function create(array $data, User $user): Quote
@@ -64,6 +94,50 @@ class QuoteService
         ]);
 
         return $quote->load(['condominium', 'supplier', 'quoteCategory', 'quoteStatus']);
+    }
+
+    public function update(int $id, array $data, User $user): Quote
+    {
+        $quote = $this->find($id, $user);
+
+        if (isset($data['amount']) && (is_string($data['amount']) || is_numeric($data['amount']))) {
+            $data['amount'] = $this->parseAmountMasked(trim((string) $data['amount']));
+        }
+        $this->validateCreateData($data);
+
+        $condominiumId = (int) $data['condominium_id'];
+        $this->ensureUserCanAccessCondominium($user, $condominiumId);
+
+        $supplier = Supplier::find($data['supplier_id'] ?? 0);
+        if (!$supplier) {
+            throw new HttpNotFoundException('Fornecedor nao encontrado');
+        }
+        $category = QuoteCategory::find($data['quote_category_id'] ?? 0);
+        if (!$category) {
+            throw new HttpNotFoundException('Categoria nao encontrada');
+        }
+        $status = QuoteStatus::find($data['quote_status_id'] ?? 0);
+        if (!$status) {
+            throw new HttpNotFoundException('Status nao encontrado');
+        }
+
+        $quote->update([
+            'title' => trim((string) ($data['title'] ?? '')),
+            'description' => trim((string) ($data['description'] ?? '')),
+            'amount' => $data['amount'],
+            'supplier_id' => $supplier->id,
+            'condominium_id' => $condominiumId,
+            'quote_category_id' => $category->id,
+            'quote_status_id' => $status->id,
+        ]);
+
+        return $quote->load(['condominium', 'supplier', 'quoteCategory', 'quoteStatus']);
+    }
+
+    public function delete(int $id, User $user): bool
+    {
+        $quote = $this->find($id, $user);
+        return (bool) $quote->delete();
     }
 
     private function validateCreateData(array $data): void

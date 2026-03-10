@@ -17,7 +17,23 @@ class QuoteController
     {
         /** @var User $user */
         $user = $request->getAttribute('user');
-        $data = ['quotes' => $this->service->list($user)];
+        $params = $request->getQueryParams();
+        $filters = [
+            'quote_category_id' => trim($params['quote_category_id'] ?? ''),
+            'quote_status_id' => trim($params['quote_status_id'] ?? ''),
+            'condominium_id' => trim($params['condominium_id'] ?? ''),
+            'supplier_id' => trim($params['supplier_id'] ?? ''),
+        ];
+        $data = ['quotes' => $this->service->list($user, $filters)];
+
+        return ResponseBuilder::respondWithData($response, data: $data);
+    }
+
+    public function find(Request $request, Response $response, array $args): Response
+    {
+        /** @var User $user */
+        $user = $request->getAttribute('user');
+        $data = ['quote' => $this->service->find((int) $args['id'], $user)];
 
         return ResponseBuilder::respondWithData($response, data: $data);
     }
@@ -31,5 +47,25 @@ class QuoteController
         $data = ['quote' => $this->service->create($body, $user)];
 
         return ResponseBuilder::respondWithData($response, HttpStatus::Created, $data);
+    }
+
+    public function update(Request $request, Response $response, array $args): Response
+    {
+        /** @var User $user */
+        $user = $request->getAttribute('user');
+        $body = $request->getParsedBody();
+
+        $data = ['quote' => $this->service->update((int) $args['id'], $body, $user)];
+
+        return ResponseBuilder::respondWithData($response, data: $data);
+    }
+
+    public function delete(Request $request, Response $response, array $args): Response
+    {
+        /** @var User $user */
+        $user = $request->getAttribute('user');
+        $this->service->delete((int) $args['id'], $user);
+
+        return ResponseBuilder::respondWithData($response, HttpStatus::OK, []);
     }
 }

@@ -71,7 +71,10 @@ return function (App $app) {
 
         $group->group('/quotes', function (RouteCollectorProxy $g) {
             $g->get('', [QuoteController::class, 'list']);
+            $g->get('/{id}', [QuoteController::class, 'find']);
             $g->post('', [QuoteController::class, 'create']);
+            $g->put('/{id}', [QuoteController::class, 'update']);
+            $g->delete('/{id}', [QuoteController::class, 'delete']);
         })->add(RequireAuthMiddleware::class);
     });
 };

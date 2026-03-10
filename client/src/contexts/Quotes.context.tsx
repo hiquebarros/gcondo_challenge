@@ -16,11 +16,17 @@ import { handleServiceError, hasServiceError } from '@helpers/Service.helper';
 import type { Condominium } from '@internal-types/Condominium.type';
 import type { Quote, QuoteCategory, QuoteStatus } from '@internal-types/Quote.type';
 import type { Supplier } from '@internal-types/Supplier.type';
+import type { QuoteFilter } from '@services/contracts/Quote.contract';
 import { listCondominiums } from '@services/Condominium.service';
-import { listQuoteCategories } from '@services/Quote.service';
-import { listQuoteStatuses } from '@services/Quote.service';
-import { listQuotes } from '@services/Quote.service';
+import { listQuoteCategories, listQuoteStatuses, listQuotes } from '@services/Quote.service';
 import { listSuppliers } from '@services/Supplier.service';
+
+const DEFAULT_FILTER: QuoteFilter = {
+    quote_category_id: '',
+    quote_status_id: '',
+    condominium_id: '',
+    supplier_id: '',
+};
 
 type Value = {
     quotes: Quote.Model[];
@@ -28,10 +34,15 @@ type Value = {
     quoteCategories: QuoteCategory.Model[];
     quoteStatuses: QuoteStatus.Model[];
     suppliers: Supplier.Model[];
+    filter: QuoteFilter;
+    setFilter: Dispatch<SetStateAction<QuoteFilter>>;
+    applyFilter: () => void;
     isLoading: boolean;
     isCreateModalVisible: boolean;
     setIsCreateModalVisible: Dispatch<SetStateAction<boolean>>;
-    fetchQuotes: () => Promise<void>;
+    quoteIdForEdit: number | null;
+    setQuoteIdForEdit: Dispatch<SetStateAction<number | null>>;
+    fetchQuotes: (criteria?: QuoteFilter) => Promise<void>;
 };
 
 type Props = { children: ReactNode };
@@ -46,16 +57,22 @@ export function QuotesContextProvider({ children }: Props) {
     const [suppliers, setSuppliers] = useState<Supplier.Model[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+    const [filter, setFilter] = useState<QuoteFilter>(DEFAULT_FILTER);
+    const [quoteIdForEdit, setQuoteIdForEdit] = useState<number | null>(null);
 
     const app = App.useApp();
 
-    const fetchQuotes = useCallback(async () => {
+    const fetchQuotes = useCallback(async (criteria?: QuoteFilter) => {
         setIsLoading(true);
-        const response = await listQuotes();
+        const response = await listQuotes(criteria ?? filter);
         setIsLoading(false);
         if (hasServiceError(response)) return handleServiceError(app, response);
         setQuotes(response.data.quotes);
-    }, [app]);
+    }, [app, filter]);
+
+    const applyFilter = useCallback(() => {
+        fetchQuotes(filter);
+    }, [fetchQuotes, filter]);
 
     const fetchCondominiums = useCallback(async () => {
         const response = await listCondominiums();
@@ -82,17 +99,25 @@ export function QuotesContextProvider({ children }: Props) {
     }, [app]);
 
     useEffect(() => {
-        fetchQuotes();
-    }, [fetchQuotes]);
+        fetchQuotes(DEFAULT_FILTER);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
-        if (isCreateModalVisible) {
+        fetchCondominiums();
+        fetchQuoteCategories();
+        fetchQuoteStatuses();
+        fetchSuppliers();
+    }, [fetchCondominiums, fetchQuoteCategories, fetchQuoteStatuses, fetchSuppliers]);
+
+    useEffect(() => {
+        if (isCreateModalVisible || quoteIdForEdit != null) {
             fetchCondominiums();
             fetchQuoteCategories();
             fetchQuoteStatuses();
             fetchSuppliers();
         }
-    }, [isCreateModalVisible, fetchCondominiums, fetchQuoteCategories, fetchQuoteStatuses, fetchSuppliers]);
+    }, [isCreateModalVisible, quoteIdForEdit, fetchCondominiums, fetchQuoteCategories, fetchQuoteStatuses, fetchSuppliers]);
 
     const value: Value = {
         quotes,
@@ -100,9 +125,14 @@ export function QuotesContextProvider({ children }: Props) {
         quoteCategories,
         quoteStatuses,
         suppliers,
+        filter,
+        setFilter,
+        applyFilter,
         isLoading,
         isCreateModalVisible,
         setIsCreateModalVisible,
+        quoteIdForEdit,
+        setQuoteIdForEdit,
         fetchQuotes,
     };
 
