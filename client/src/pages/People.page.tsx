@@ -143,7 +143,6 @@ export function People() {
                             </Col>
                             <Col xs={24} sm={6}>
                                 <Button
-                                    type="primary"
                                     icon={<SearchOutlined />}
                                     onClick={applyFilter}
                                 >

@@ -129,7 +129,7 @@ function QuotesContent() {
                         />
                     </Col>
                     <Col xs={24} sm={2}>
-                        <Button type="primary" icon={<SearchOutlined />} onClick={applyFilter}>
+                        <Button icon={<SearchOutlined />} onClick={applyFilter}>
                             Buscar
                         </Button>
                     </Col>

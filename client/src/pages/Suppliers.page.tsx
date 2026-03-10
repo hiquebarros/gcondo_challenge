@@ -135,7 +135,6 @@ export function Suppliers() {
                             </Col>
                             <Col xs={24} sm={4}>
                                 <Button
-                                    type="primary"
                                     icon={<SearchOutlined />}
                                     onClick={applyFilter}
                                 >
