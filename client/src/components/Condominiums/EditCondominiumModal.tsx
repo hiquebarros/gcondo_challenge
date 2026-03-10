@@ -64,7 +64,10 @@ export function EditCondominiumModal() {
                 name="editCondominium"
                 layout="vertical"
                 autoComplete="off"
-                initialValues={condominium}
+                initialValues={{
+                    ...condominium,
+                    zip_code: (condominium.zip_code ?? '').replace(/\D/g, ''),
+                }}
             >                
                 <CondominiumFields />
             </Form>
