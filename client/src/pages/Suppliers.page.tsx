@@ -63,6 +63,7 @@ export function Suppliers() {
                 isLoading,
                 suppliers,
                 supplierCategories,
+                isLoadingSupplierCategories,
                 filter,
                 setFilter,
                 applyFilter,
@@ -131,6 +132,8 @@ export function Suppliers() {
                                     value={filter.supplier_category_id || undefined}
                                     onChange={v => setFilter(f => ({ ...f, supplier_category_id: v ? String(v) : '' }))}
                                     options={supplierCategories.map(c => ({ value: String(c.id), label: c.name }))}
+                                    loading={isLoadingSupplierCategories}
+                                    notFoundContent={isLoadingSupplierCategories ? 'Carregando...' : undefined}
                                 />
                             </Col>
                             <Col xs={24} sm={4}>

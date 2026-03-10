@@ -73,7 +73,20 @@ export type EditQuoteValues = {
 export function EditQuoteModal() {
     const [isSending, setIsSending] = useState(false);
     const [quote, setQuote] = useState<Quote.Model | null>(null);
-    const { quoteIdForEdit, setQuoteIdForEdit, fetchQuotes, filter, condominiums, quoteCategories, quoteStatuses, suppliers } = useQuotesContext();
+    const {
+        quoteIdForEdit,
+        setQuoteIdForEdit,
+        fetchQuotes,
+        filter,
+        condominiums,
+        quoteCategories,
+        quoteStatuses,
+        suppliers,
+        isLoadingCondominiums,
+        isLoadingQuoteCategories,
+        isLoadingQuoteStatuses,
+        isLoadingSuppliers,
+    } = useQuotesContext();
     const [form] = Form.useForm<EditQuoteValues>();
     const app = App.useApp();
 
@@ -190,6 +203,8 @@ export function EditQuoteModal() {
                         placeholder="Selecione o fornecedor"
                         allowClear
                         options={suppliers.map((s) => ({ value: s.id, label: s.legal_name }))}
+                        loading={isLoadingSuppliers}
+                        notFoundContent={isLoadingSuppliers ? 'Carregando...' : undefined}
                     />
                 </Form.Item>
                 <Form.Item<EditQuoteValues>
@@ -201,6 +216,8 @@ export function EditQuoteModal() {
                         placeholder="Selecione o condomínio"
                         allowClear
                         options={condominiums.map((c) => ({ value: c.id, label: c.name }))}
+                        loading={isLoadingCondominiums}
+                        notFoundContent={isLoadingCondominiums ? 'Carregando...' : undefined}
                     />
                 </Form.Item>
                 <Form.Item<EditQuoteValues>
@@ -219,6 +236,8 @@ export function EditQuoteModal() {
                         placeholder="Selecione a categoria"
                         allowClear
                         options={quoteCategories.map((c) => ({ value: c.id, label: c.name }))}
+                        loading={isLoadingQuoteCategories}
+                        notFoundContent={isLoadingQuoteCategories ? 'Carregando...' : undefined}
                     />
                 </Form.Item>
                 <Form.Item<EditQuoteValues>
@@ -230,6 +249,8 @@ export function EditQuoteModal() {
                         placeholder="Selecione o status"
                         allowClear
                         options={quoteStatuses.map((s) => ({ value: s.id, label: s.name }))}
+                        loading={isLoadingQuoteStatuses}
+                        notFoundContent={isLoadingQuoteStatuses ? 'Carregando...' : undefined}
                     />
                 </Form.Item>
             </Form>

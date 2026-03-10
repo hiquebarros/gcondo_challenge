@@ -42,7 +42,7 @@ export function CreateSupplierModal() {
     const personOptionMapRef = useRef<Record<number, { value: number; label: string }>>({});
     const lastFetchedCnpjRef = useRef<string | null>(null);
 
-    const { setIsCreateModalVisible, fetchSuppliers, supplierCategories } = useSuppliersContext();
+    const { setIsCreateModalVisible, fetchSuppliers, supplierCategories, isLoadingSupplierCategories } = useSuppliersContext();
 
     const [form] = Form.useForm<CreateSupplierValues>();
 
@@ -222,6 +222,8 @@ export function CreateSupplierModal() {
                                 placeholder="Selecione a categoria"
                                 allowClear
                                 options={supplierCategories.map(c => ({ value: c.id, label: c.name }))}
+                                loading={isLoadingSupplierCategories}
+                                notFoundContent={isLoadingSupplierCategories ? 'Carregando...' : undefined}
                             />
                         </Form.Item>
 

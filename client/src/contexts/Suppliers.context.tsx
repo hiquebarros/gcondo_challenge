@@ -43,6 +43,8 @@ type Value = {
     suppliers: Supplier.Model[];
     supplierCategories: SupplierCategory.Model[];
     people: import('@internal-types/Person.type').Person.Model[];
+    isLoadingSupplierCategories: boolean;
+    isLoadingPeople: boolean;
     filter: Supplier.Filter;
     setFilter: Dispatch<SetStateAction<Value['filter']>>;
     applyFilter: () => void;
@@ -62,6 +64,8 @@ export function SuppliersContextProvider({ children }: Props) {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingSupplierCategories, setIsLoadingSupplierCategories] = useState(false);
+    const [isLoadingPeople, setIsLoadingPeople] = useState(false);
     const [suppliers, setSuppliers] = useState<Supplier.Model[]>([]);
     const [supplierCategories, setSupplierCategories] = useState<SupplierCategory.Model[]>([]);
     const [people, setPeople] = useState<Value['people']>([]);
@@ -71,13 +75,17 @@ export function SuppliersContextProvider({ children }: Props) {
     const app = App.useApp();
 
     const fetchSupplierCategories = useCallback(async () => {
+        setIsLoadingSupplierCategories(true);
         const response = await listSupplierCategories();
+        setIsLoadingSupplierCategories(false);
         if (hasServiceError(response)) return handleServiceError(app, response);
         setSupplierCategories(response.data.supplier_categories);
     }, [app]);
 
     const fetchPeople = useCallback(async () => {
+        setIsLoadingPeople(true);
         const response = await listPeople();
+        setIsLoadingPeople(false);
         if (hasServiceError(response)) return handleServiceError(app, response);
         setPeople(response.data.people);
     }, [app]);
@@ -116,6 +124,8 @@ export function SuppliersContextProvider({ children }: Props) {
         suppliers,
         supplierCategories,
         people,
+        isLoadingSupplierCategories,
+        isLoadingPeople,
         filter,
         setFilter,
         applyFilter,

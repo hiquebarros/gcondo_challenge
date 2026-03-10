@@ -34,6 +34,10 @@ type Value = {
     quoteCategories: QuoteCategory.Model[];
     quoteStatuses: QuoteStatus.Model[];
     suppliers: Supplier.Model[];
+    isLoadingCondominiums: boolean;
+    isLoadingQuoteCategories: boolean;
+    isLoadingQuoteStatuses: boolean;
+    isLoadingSuppliers: boolean;
     filter: QuoteFilter;
     setFilter: Dispatch<SetStateAction<QuoteFilter>>;
     applyFilter: () => void;
@@ -56,6 +60,10 @@ export function QuotesContextProvider({ children }: Props) {
     const [quoteStatuses, setQuoteStatuses] = useState<QuoteStatus.Model[]>([]);
     const [suppliers, setSuppliers] = useState<Supplier.Model[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingCondominiums, setIsLoadingCondominiums] = useState(false);
+    const [isLoadingQuoteCategories, setIsLoadingQuoteCategories] = useState(false);
+    const [isLoadingQuoteStatuses, setIsLoadingQuoteStatuses] = useState(false);
+    const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(false);
     const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
     const [filter, setFilter] = useState<QuoteFilter>(DEFAULT_FILTER);
     const [quoteIdForEdit, setQuoteIdForEdit] = useState<number | null>(null);
@@ -75,25 +83,33 @@ export function QuotesContextProvider({ children }: Props) {
     }, [fetchQuotes, filter]);
 
     const fetchCondominiums = useCallback(async () => {
+        setIsLoadingCondominiums(true);
         const response = await listCondominiums();
+        setIsLoadingCondominiums(false);
         if (hasServiceError(response)) return handleServiceError(app, response);
         setCondominiums(response.data.condominiums);
     }, [app]);
 
     const fetchQuoteCategories = useCallback(async () => {
+        setIsLoadingQuoteCategories(true);
         const response = await listQuoteCategories();
+        setIsLoadingQuoteCategories(false);
         if (hasServiceError(response)) return handleServiceError(app, response);
         setQuoteCategories(response.data.quote_categories);
     }, [app]);
 
     const fetchSuppliers = useCallback(async () => {
+        setIsLoadingSuppliers(true);
         const response = await listSuppliers();
+        setIsLoadingSuppliers(false);
         if (hasServiceError(response)) return handleServiceError(app, response);
         setSuppliers(response.data.suppliers);
     }, [app]);
 
     const fetchQuoteStatuses = useCallback(async () => {
+        setIsLoadingQuoteStatuses(true);
         const response = await listQuoteStatuses();
+        setIsLoadingQuoteStatuses(false);
         if (hasServiceError(response)) return handleServiceError(app, response);
         setQuoteStatuses(response.data.quote_statuses);
     }, [app]);
@@ -110,21 +126,16 @@ export function QuotesContextProvider({ children }: Props) {
         fetchSuppliers();
     }, [fetchCondominiums, fetchQuoteCategories, fetchQuoteStatuses, fetchSuppliers]);
 
-    useEffect(() => {
-        if (isCreateModalVisible || quoteIdForEdit != null) {
-            fetchCondominiums();
-            fetchQuoteCategories();
-            fetchQuoteStatuses();
-            fetchSuppliers();
-        }
-    }, [isCreateModalVisible, quoteIdForEdit, fetchCondominiums, fetchQuoteCategories, fetchQuoteStatuses, fetchSuppliers]);
-
     const value: Value = {
         quotes,
         condominiums,
         quoteCategories,
         quoteStatuses,
         suppliers,
+        isLoadingCondominiums,
+        isLoadingQuoteCategories,
+        isLoadingQuoteStatuses,
+        isLoadingSuppliers,
         filter,
         setFilter,
         applyFilter,

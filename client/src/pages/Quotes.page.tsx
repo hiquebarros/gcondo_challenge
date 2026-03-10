@@ -72,6 +72,10 @@ function QuotesContent() {
         quoteCategories,
         quoteStatuses,
         suppliers,
+        isLoadingCondominiums,
+        isLoadingQuoteCategories,
+        isLoadingQuoteStatuses,
+        isLoadingSuppliers,
         setIsCreateModalVisible,
         isCreateModalVisible,
         quoteIdForEdit,
@@ -96,6 +100,8 @@ function QuotesContent() {
                             value={filter.quote_category_id || undefined}
                             onChange={v => setFilter(f => ({ ...f, quote_category_id: v ? String(v) : '' }))}
                             options={quoteCategories.map(c => ({ value: String(c.id), label: c.name }))}
+                            loading={isLoadingQuoteCategories}
+                            notFoundContent={isLoadingQuoteCategories ? 'Carregando...' : undefined}
                         />
                     </Col>
                     <Col xs={24} sm={6}>
@@ -106,6 +112,8 @@ function QuotesContent() {
                             value={filter.quote_status_id || undefined}
                             onChange={v => setFilter(f => ({ ...f, quote_status_id: v ? String(v) : '' }))}
                             options={quoteStatuses.map(s => ({ value: String(s.id), label: s.name }))}
+                            loading={isLoadingQuoteStatuses}
+                            notFoundContent={isLoadingQuoteStatuses ? 'Carregando...' : undefined}
                         />
                     </Col>
                     <Col xs={24} sm={6}>
@@ -116,6 +124,8 @@ function QuotesContent() {
                             value={filter.condominium_id || undefined}
                             onChange={v => setFilter(f => ({ ...f, condominium_id: v ? String(v) : '' }))}
                             options={condominiums.map(c => ({ value: String(c.id), label: c.name }))}
+                            loading={isLoadingCondominiums}
+                            notFoundContent={isLoadingCondominiums ? 'Carregando...' : undefined}
                         />
                     </Col>
                     <Col xs={24} sm={4}>
@@ -126,6 +136,8 @@ function QuotesContent() {
                             value={filter.supplier_id || undefined}
                             onChange={v => setFilter(f => ({ ...f, supplier_id: v ? String(v) : '' }))}
                             options={suppliers.map(s => ({ value: String(s.id), label: s.legal_name }))}
+                            loading={isLoadingSuppliers}
+                            notFoundContent={isLoadingSuppliers ? 'Carregando...' : undefined}
                         />
                     </Col>
                     <Col xs={24} sm={2}>
